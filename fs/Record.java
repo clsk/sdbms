@@ -6,8 +6,7 @@ public class Record
     {
 
     }
-
-
+        
     public void setData(String _data)
     {
         data = _data;

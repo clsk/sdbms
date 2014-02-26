@@ -40,4 +40,9 @@ public class Page
     private String[] records;
     private int capacity;
     private int currentSize;
+    
+    // Atributo para Puntero/Llave de la Pagina Anterior.
+    private Page prevPage;
+    // Atributo para Puntero/Llave de la Pagina Siguiente.
+    private Page nextPage;
 }
