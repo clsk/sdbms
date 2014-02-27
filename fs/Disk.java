@@ -25,7 +25,7 @@ public class Disk
 	    		file.createNewFile();
 	    	
 	    	FileWriter fw = new FileWriter(filePath, true);
-	    	Pair pair = null;
+	    	Pair<Integer, Integer> pair = null;
 	    	int size;
 	    	int position;
 	    	String str;

@@ -24,7 +24,7 @@ public class Page
     public Page(Schema _schema, String[] _records, BitSet _slotMap)
     {
         schema = _schema;
-        records = _records;
+        slots = _records;
         slotMap = _slotMap;
         capacity = _records.length;
         slotCount = slotMap.cardinality();
@@ -36,7 +36,7 @@ public class Page
             throw new Error("Page is full");
         }
 
-        int i = slotMap.nextSetBit();
+        int i = slotMap.nextSetBit(0);
         slots[i] = record;
         return ++slotCount;
     }
