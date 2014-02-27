@@ -54,6 +54,10 @@ public class Page
         return slotMap;
     }
 
+    public Schema getSchema(){
+    	return this.schema;
+    }
+    
     public int getPrevPage()
     {
         return prevPage;
@@ -73,7 +77,16 @@ public class Page
     {
         nextPage = pageId;
     }
+    
+    public int getID()
+    {
+        return this.id;
+    }
 
+    public void setID(int id)
+    {
+        this.id = id;
+    }
 
     // Private Members
     private int id;

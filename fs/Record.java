@@ -1,5 +1,3 @@
-package fs;
-
 public class Record
 {
     public Record()
