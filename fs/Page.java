@@ -11,7 +11,23 @@ public class Page
     {
         schema = _schema;
         capacity = SIZE / _schema.getRecordLength();
+        int t = SIZE - capacity;
+        if (t > ((capacity+7)/8) + 8) {
+            capacity--;
+        }
+
+        slotMap = new BitSet(capacity);
+
         slots = new String[capacity];
+    }
+
+    public Page(Schema _schema, String[] _records, BitSet _slotMap)
+    {
+        schema = _schema;
+        records = _records;
+        slotMap = _slotMap;
+        capacity = _records.length;
+        slotCount = slotMap.cardinality();
     }
 
     public int addRecord(String record)
@@ -20,8 +36,14 @@ public class Page
             throw new Error("Page is full");
         }
 
-        slots[slotCount] = record;
+        int i = slotMap.nextSetBit();
+        slots[i] = record;
         return ++slotCount;
+    }
+
+    public void removeRecord(int slot)
+    {
+        slotMap.clear(slot);
     }
 
     public String[] getRecords()

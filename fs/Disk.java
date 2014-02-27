@@ -1,9 +1,9 @@
-package fs;
 import java.io.File;
+import java.io.FileWriter;
 
 public class Disk
 {
-	private static String path = "c:/DB";
+	private static String root = "c:\\DB"; //root por defecto
 	
     public static Page readPage(String file)
     {
@@ -12,13 +12,25 @@ public class Disk
 
     public static void writePage(Page page)
     {
-    	File dir = new File(path + "/" + page.getSchema().getName());
-    	boolean existDir = dir.mkdir();
+    	String dirPath = root + "\\" + page.getSchema().getName();
+    	File dir = new File(dirPath);
+    	dir.mkdirs(); //Verifica si existe el directorio, sino lo crea
    
-    	System.out.println(existDir);
-    	
-    	for (String str : page.getRecords()) {
-    		System.out.println(str);
+    	String filePath = dirPath + "\\" + page.getID() + ".txt";
+    	File file = new File(filePath);
+    	try {
+	    	if(!file.exists()) //Verifica si existe el archivo, sino lo crea
+	    		file.createNewFile();
+	    	
+	    	FileWriter fw = new FileWriter(filePath, true);
+	    	for (String cadena : page.getRecords()) {
+	    		if(cadena != null)
+	    			fw.write(cadena + '\n'); //En esta parte se escribe en el archivo
+			}
+	    	fw.flush();
+	    	fw.close();
+		} catch (Exception e) {
+			System.out.println("Ha ocurrido un error en el metodo writePage.");
 		}
     }
 }
