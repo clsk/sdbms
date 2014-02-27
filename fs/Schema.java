@@ -20,7 +20,7 @@ public class Schema
         	Integer pos = _pos.intValue();
         	Pair <Integer, Integer> aux = new Pair <Integer, Integer> (pos, var);    	
         	fields.put(_name.toLowerCase(), aux);
-        	setBlockSize(var);
+        	setRecordLength(var);
     	}
     	else {
     		System.out.println("Este atributo ya existe en el Schema");
@@ -38,7 +38,7 @@ public class Schema
         	Integer pos = size.getKey().intValue();
         	Pair <Integer, Integer> aux = new Pair <Integer, Integer> (pos, var);
         	fields.put(_name.toLowerCase(), aux);
-        	setBlockSize(var);
+        	setRecordLength(var);
     	}
     	else {
     		System.out.println("Este atributo ya existe en el Schema");
@@ -49,7 +49,7 @@ public class Schema
      * Funcion de Retorno del Nombre del Schema.
      */
     public String getSchemaName() {
- 		return this.name;
+ 		return name;
  	}
     
     /*
@@ -66,9 +66,22 @@ public class Schema
         			auxName = n;
         			break;
         		} 
-        	}    	    	    		
+        	} 	    	    		
     	}
     	return auxName;	
+    }
+    
+    /*
+     * Funcion de Retorno de la Posición y Tamaño del Atributo.
+     */
+    public Pair <Integer, Integer> getFieldPair (String _name){
+    	Pair <Integer, Integer> auxPos = null;
+    	
+    	if (!fields.isEmpty()){
+    	   	 auxPos = fields.get(_name);
+    	}
+    	
+    	return auxPos;
     }
     
     /*
@@ -78,38 +91,35 @@ public class Schema
     	Integer auxPos = null;
     	
     	if (!fields.isEmpty()){
-    		for (String n : fields.keySet()){
-    			if (n == _name.toLowerCase()){
-    				auxPos = fields.get(n).getKey();
-    				break;
-    			}
-    		}    			
-       	}
+    	   	 auxPos = fields.get(_name).getKey();
+    	}
+    	
     	return auxPos;
     }
     
     /*
      * Funcion para Actualizar el Tamaño del Schema.
      */
-    private void setBlockSize (int _value){
-    	blockSize += _value;
+    private void setRecordLength (int _value){
+    	this.recordLength += _value;
+    }
+    
+    /*
+     * Funcion de Retorno de las Parejas de Posicion y Tamaño
+     * de los Atributos.
+     */
+    public HashMap <String, Pair <Integer, Integer>> getFields (){
+    	return fields;
     }
     
     /*
      * Funcion de Retorno del Tamaño del Schema.
      */
-    public int getBlockSize (){
-    	return this.blockSize;
-    }
-    
-    /*
-     * Funcion de retorno de HashMap del Schema.
-     */
-    public HashMap <String, Pair <Integer, Integer>> getFields (){
-    	return this.fields;
+    public int getRecordLength (){
+    	return recordLength;
     }
     
 	private HashMap <String, Pair <Integer, Integer>> fields;
     private String name = null;
-    private Integer blockSize = 0;
+    private int recordLength = 0;
 }
