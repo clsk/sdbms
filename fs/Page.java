@@ -1,35 +1,32 @@
 package fs;
 
 import java.lang.Error;
+import java.util.BitSet;
 
 public class Page
 {
-    public static short SIZE = 16*1024; // 16kb
+    public static int SIZE = 16*1024; // 16kb
 
     public Page(Schema _schema)
     {
         schema = _schema;
         capacity = SIZE / _schema.getRecordLength();
-        records = new String[capacity];
+        slots = new String[capacity];
     }
-
-    Schema schema;
 
     public int addRecord(String record)
     {
-        if (currentSize < capacity) {
-            records[currentSize] = record;
-            currentSize++;
-        } else {
-            throw new java.lang.Error("Page is full");
+        if (slotCount >= capacity) {
+            throw new Error("Page is full");
         }
 
-        return currentSize;
+        slots[slotCount] = record;
+        return ++slotCount;
     }
 
     public String[] getRecords()
     {
-        return records;
+        return slots;
     }
 
     public int getCapacity()
@@ -37,12 +34,57 @@ public class Page
         return capacity;
     }
 
-    private String[] records;
+    public int getSlotCount()
+    {
+        return slotCount;
+    }
+
+    public int getEmptySlotCount()
+    {
+        return capacity - slotCount;
+    }
+
+    public void setSlotMap(BitSet map)
+    {
+        slotMap = map;
+    }
+
+    public BitSet getSlotMap()
+    {
+        return slotMap;
+    }
+
+    public int getPrevPage()
+    {
+        return prevPage;
+    }
+
+    public void setPrevPage(int pageId)
+    {
+        prevPage = pageId;
+    }
+
+    public int getNextPage()
+    {
+        return nextPage;
+    }
+
+    public void setNextPage(int pageId)
+    {
+        nextPage = pageId;
+    }
+
+
+    // Private Members
+    private int id;
+    private Schema schema;
+    private String[] slots;
     private int capacity;
-    private int currentSize;
-    
+    private int slotCount;
+    private BitSet slotMap;
+
     // Atributo para Puntero/Llave de la Pagina Anterior.
-    private Page prevPage;
+    private int prevPage;
     // Atributo para Puntero/Llave de la Pagina Siguiente.
-    private Page nextPage;
+    private int nextPage;
 }
