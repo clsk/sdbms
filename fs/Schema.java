@@ -20,7 +20,7 @@ public class Schema
         	Integer pos = _pos.intValue();
         	Pair <Integer, Integer> aux = new Pair <Integer, Integer> (pos, var);    	
         	fields.put(_name.toLowerCase(), aux);
-        	setRecordLength(var);
+        	addRecordLength(var);
     	}
     	else {
     		System.out.println("Este atributo ya existe en el Schema");
@@ -38,7 +38,7 @@ public class Schema
         	Integer pos = size.getKey().intValue();
         	Pair <Integer, Integer> aux = new Pair <Integer, Integer> (pos, var);
         	fields.put(_name.toLowerCase(), aux);
-        	setRecordLength(var);
+        	addRecordLength(var);
     	}
     	else {
     		System.out.println("Este atributo ya existe en el Schema");
@@ -100,7 +100,7 @@ public class Schema
     /*
      * Funcion para Actualizar el Tamaño del Schema.
      */
-    private void setRecordLength (int _value){
+    private void addRecordLength (int _value){
     	this.recordLength += _value;
     }
     
