@@ -1,4 +1,5 @@
 package fs;
+
 import java.util.HashMap;
 import java.lang.Integer;
 
@@ -91,20 +92,20 @@ public class Schema
      * Funcion para Actualizar el Tamaño del Schema.
      */
     private void setBlockSize (int _value){
-    	this.blockSize += _value;
+    	blockSize += _value;
     }
     
     /*
      * Funcion de Retorno del Tamaño del Schema.
      */
     public int getBlockSize (){
-    	return blockSize.intValue();
+    	return this.blockSize;
     }
     
     /*
      * Funcion de retorno de HashMap del Schema.
      */
-    public HashMap <String, Pair <Integer, Integer>> getPositionSize (){
+    public HashMap <String, Pair <Integer, Integer>> getFields (){
     	return this.fields;
     }
     
