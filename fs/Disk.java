@@ -25,10 +25,22 @@ public class Disk
 	    		file.createNewFile();
 	    	
 	    	FileWriter fw = new FileWriter(filePath, true);
+	    	Pair pair = null;
+	    	int size;
+	    	int position;
+	    	String str;
 	    	for (String cadena : page.getRecords()) {
 	    		if(cadena != null){
-	    			page.getSchema().
-	    			fw.write(cadena); 
+	    			for (String field : page.getSchema().getFields().keySet()) {
+	    				pair = page.getSchema().getFields().get(field);
+	    				position = (int)pair.getKey(); //position
+	    				size = (int)pair.getValue(); //size
+	    				
+	    				//En esta parte se colocaran las sub-cadenas para formar el record
+	    				//esto dependera del schema
+					}
+	    			
+	    			//fw.write(cadena); 
 	    		}
 			}
 	    	fw.write(page.getPrevPage());
