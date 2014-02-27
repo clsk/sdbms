@@ -1,34 +1,25 @@
 package fs;
 
 import java.util.HashMap;
-import java.util.Map;
-
 
 public class Schema
 {
     public Schema(String name)
     {
-        fields = new HashMap<String, Integer>();
-        recordLength = 0;
+        fields = new HashMap <String, Pair <Integer, Integer>>();
         this.name = name;
     }
 
-    public void addField(String name, int size)
+    public void addField(String name, Pair <Integer, Integer> PosLength)
     {
-        fields.put(name, size);
-        recordLength += 2 * size;
-    }
-
-    public int getRecordLength()
-    {
-        return recordLength;
+    	PosLength.pair = PosLength.pair * 2;
+    	fields.put(name, PosLength);
     }
 
     public String getName() {
 		return name;
 	}
 
-	private HashMap<String, Integer> fields;
-    private int recordLength;
+	private HashMap<String, Pair<Integer, Integer>> fields;
     private String name = null;
 }
