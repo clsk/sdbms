@@ -1,3 +1,5 @@
+package fs;
+
 import java.lang.Number;
 
 public class Pair <T, V> {
