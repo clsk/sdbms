@@ -44,6 +44,10 @@ public class Schema
     public String getSchemaName() {
 		return name;
 	}
+    
+    public HashMap <String, Pair <Integer, Integer>> getFields(){
+    	return this.fields;
+    }
 
 	private HashMap <String, Pair <Integer, Integer>> fields;
     private String name = null;

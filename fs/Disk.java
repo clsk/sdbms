@@ -14,7 +14,7 @@ public class Disk
 
     public static void writePage(Page page)
     {
-    	String dirPath = root + "\\" + page.getSchema().getName();
+    	String dirPath = root + "\\" + page.getSchema().getSchemaName();
     	File dir = new File(dirPath);
     	dir.mkdirs(); //Verifica si existe el directorio, sino lo crea
    
@@ -26,9 +26,14 @@ public class Disk
 	    	
 	    	FileWriter fw = new FileWriter(filePath, true);
 	    	for (String cadena : page.getRecords()) {
-	    		if(cadena != null)
-	    			fw.write(cadena + '\n'); //En esta parte se escribe en el archivo
+	    		if(cadena != null){
+	    			page.getSchema().
+	    			fw.write(cadena); 
+	    		}
 			}
+	    	fw.write(page.getPrevPage());
+	    	fw.write(page.getNextPage());
+	    	//fw.write(page.getSlotMap());
 	    	fw.flush();
 	    	fw.close();
 		} catch (Exception e) {
