@@ -30,21 +30,19 @@ public class Disk
             try {
                 buffer.put(record.getBytes("US-ASCII"));
             } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                e.printStackTrace();
             }
         }
 
         // Write Pointers and bitmap towards very end of file
         byte[] bitmap = toByteArray(slotMap);
+
         // - Calculate index
         int index = page.SIZE - (bitmap.length + 8) - 1;
         // Write pointers and bitmap
-        buffer.putInt(index, page.getPrevPage());
-        index += 4;
-        buffer.putInt(index+4, page.getNextPage());
-        index += 4;
+        buffer.putInt(page.getPrevPage());
+        buffer.putInt(page.getNextPage());
         buffer.put(bitmap);
-
 
     	String dirPath = ROOT + PATH_SEPARATOR +  page.getSchema().getSchemaName();
     	File dir = new File(dirPath);
@@ -57,8 +55,12 @@ public class Disk
 	    		file.createNewFile();
 
                 FileChannel channel = new FileOutputStream(file, false).getChannel();
-                channel.write(buffer);
+
+                System.out.println(buffer.toString());
+                buffer.rewind();
+                System.out.println("Writing " + channel.write(buffer, 0) + " bytes");
                 channel.close();
+
 		} catch (Exception e) {
 			System.out.println("Ha ocurrido un error en el metodo writePage.");
 		}

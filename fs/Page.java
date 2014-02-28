@@ -44,9 +44,11 @@ public class Page
             throw new Error("Page is full");
         }
 
-        int i = slotMap.nextSetBit(0);
+        int i = slotMap.nextClearBit(0);
         slots[i] = record;
-        return ++slotCount;
+        slotMap.set(i, true);
+        slotCount++;
+        return i;
     }
 
     public void removeRecord(int slot)

@@ -9,9 +9,4 @@ public class RID {
     {
         return String.valueOf(pageId) + String.valueOf(offset);
     }
-
-    public int toInteger()
-    {
-        return (pageId*10)+offset;
-    }
 }

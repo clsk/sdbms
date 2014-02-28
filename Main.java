@@ -21,6 +21,14 @@ public class Main
         System.out.println("Page capacity: " + page.getCapacity());
         System.out.println("Page Slot Count: " + page.getSlotCount());
         System.out.println("Page Empty Slots: " + page.getEmptySlotCount());
+
+        String name = Utilities.padRight("SYSTEMCATALOG", 128);
+        String free = Utilities.padRight("0", 10);
+        String occupied = Utilities.padRight("-1", 10);
+        String record = name + free + occupied;
+        System.out.println("Record len: " + record.length());
+        System.out.println("Adding record to slot: " +  page.addRecord(record));
+
         Disk.writePage(page);
     }
 }
