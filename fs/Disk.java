@@ -88,8 +88,8 @@ public class Disk
 	    		file.createNewFile();
 
                 FileChannel channel = new FileOutputStream(file, false).getChannel();
-
                 buffer.rewind();
+                channel.write(buffer, 0);
                 channel.close();
 
 		} catch (Exception e) {

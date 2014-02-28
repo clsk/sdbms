@@ -1,5 +1,6 @@
 import fs.*;
 import java.lang.System;
+import java.util.Map;
 
 public class Main
 {
@@ -33,5 +34,10 @@ public class Main
 
         Page rPage = Disk.readPage(catalogSchema, 0);
         System.out.println("Occupied slots: " + rPage.getSlotMap());
+
+        for (Map.Entry<String, FieldValue> field : catalogFieldSchema.getSortedFields())
+        {
+            System.out.println("" + field.getValue().pos + ": " + field.getKey() + "(" + field.getValue().size + ")");
+        }
     }
 }
