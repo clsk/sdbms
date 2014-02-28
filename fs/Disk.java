@@ -25,12 +25,12 @@ public class Disk
         BitSet slotMap = page.getSlotMap();
         Schema schema = page.getSchema();
         String[] records = page.getRecords();
-        for (int i = slotMap.nextSetBit(0); i >= 0; i = slotMap.nextSetBit(i+1))
+        for (String record : records)
         {
             try {
-                buffer.put(records[i].getBytes("US-ACII"), (i+1)*schema.getRecordLength(), records[i].length());
+                buffer.put(record.getBytes("US-ASCII"));
             } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             }
         }
 
@@ -43,7 +43,7 @@ public class Disk
         index += 4;
         buffer.putInt(index+4, page.getNextPage());
         index += 4;
-//        buffer.put(bitmap, index, bitmap.length);
+        buffer.put(bitmap);
 
 
     	String dirPath = ROOT + PATH_SEPARATOR +  page.getSchema().getSchemaName();

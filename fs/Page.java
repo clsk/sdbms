@@ -1,6 +1,7 @@
 package fs;
 
 import java.lang.Error;
+import java.util.Arrays;
 import java.util.BitSet;
 
 public class Page
@@ -20,6 +21,12 @@ public class Page
         slotMap = new BitSet(capacity);
 
         slots = new String[capacity];
+        for (int i = 0; i < slots.length; i++)
+        {
+            char[] empty = new char[schema.getRecordLength()];
+            Arrays.fill(empty, ' ');
+            slots[i] = new String(empty);
+        }
     }
 
     public Page(Schema _schema, String[] _records, BitSet _slotMap)
