@@ -1,14 +1,16 @@
+package fs;
+
 public class Record
 {
-    public Record()
+    public Record(Schema schema, String record)
     {
+
 
     }
         
     public void setData(String _data)
     {
-        data = _data;
     }
 
-    private String data;
+    private String[] data;
 }

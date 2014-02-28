@@ -10,6 +10,12 @@ public class Pair <T, V> {
 		key = theKey;
 		value = theValue;
 	}
+
+    public Pair(Pair<T, V> p)
+    {
+        key = p.getKey();
+        value = p.getValue();
+    }
 	
 	public T getKey(){
 		return this.key;

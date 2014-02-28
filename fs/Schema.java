@@ -2,6 +2,7 @@ package fs;
 
 import java.util.HashMap;
 import java.lang.Integer;
+import java.util.Map;
 
 public class Schema
 {
@@ -16,11 +17,9 @@ public class Schema
      */    
     public void addField (String _name, Integer _pos, Integer _size) {
     	if (!fields.containsKey(_name)){
-    		Integer var = _size.intValue();
-        	Integer pos = _pos.intValue();
-        	Pair <Integer, Integer> aux = new Pair <Integer, Integer> (pos, var);    	
+        	Pair <Integer, Integer> aux = new Pair <Integer, Integer> (_pos, _size);
         	fields.put(_name.toLowerCase(), aux);
-        	addRecordLength(var);
+        	addRecordLength(_size);
     	}
     	else {
     		System.out.println("Este atributo ya existe en el Schema");
@@ -34,11 +33,9 @@ public class Schema
     public void addField(String _name, Pair <Integer, Integer> size)
     {
     	if (!fields.containsKey(_name)){
-    		Integer var = size.getValue().intValue();
-        	Integer pos = size.getKey().intValue();
-        	Pair <Integer, Integer> aux = new Pair <Integer, Integer> (pos, var);
-        	fields.put(_name.toLowerCase(), aux);
-        	addRecordLength(var);
+        	Pair <Integer, Integer> aux = new Pair <Integer, Integer> (size);
+        	fields.put(_name.toLowerCase(), new Pair <Integer, Integer> (size));
+        	addRecordLength(size.getValue());
     	}
     	else {
     		System.out.println("Este atributo ya existe en el Schema");
@@ -56,45 +53,27 @@ public class Schema
      * Funcion de Retorno del Nombre del Atributo.
      */
     public String getFieldName(Integer position) {
-    	String auxName = null;    	
-    	Integer auxPos;
-    	
-    	if (!fields.isEmpty()){
-    		for (String n : fields.keySet()){
-        		auxPos = fields.get(n).getKey();
-        		if (position.intValue() == auxPos) {
-        			auxName = n;
-        			break;
-        		} 
-        	} 	    	    		
-    	}
-    	return auxName;	
+        for (Map.Entry<String, Pair<Integer, Integer>> field : fields.entrySet())
+            if (field.getValue().getKey() == position)
+                return field.getKey();
+
+    	return null;
     }
     
     /*
      * Funcion de Retorno de la Posici�n y Tama�o del Atributo.
      */
     public Pair <Integer, Integer> getFieldPair (String _name){
-    	Pair <Integer, Integer> auxPos = null;
-    	
-    	if (!fields.isEmpty()){
-    	   	 auxPos = fields.get(_name);
-    	}
-    	
-    	return auxPos;
+    	return fields.get(_name);
     }
     
     /*
      * Funcion de Retorno de la Posici�n del Atributo.
      */
     public Integer getFieldPos (String _name){
-    	Integer auxPos = null;
-    	
-    	if (!fields.isEmpty()){
-    	   	 auxPos = fields.get(_name).getKey();
-    	}
-    	
-    	return auxPos;
+        Pair<Integer, Integer> field = fields.get(_name);
+        return field != null ? field.getKey() : null;
+
     }
     
     /*
