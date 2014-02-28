@@ -1,11 +1,9 @@
 package fs;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.util.Arrays;
@@ -39,7 +37,6 @@ public class Disk
                 records[i] = new String(Arrays.copyOfRange(buffer, index, index+schema.getRecordLength()), "US-ASCII");
             }
 
-            System.out.println("Index of prevPage: " + index);
             final int prevPage = ByteBuffer.wrap(Arrays.copyOfRange(buffer, index, index+4)).getInt();
             index += 4;
             final int nextPage = ByteBuffer.wrap(Arrays.copyOfRange(buffer, index, index+4)).getInt();
@@ -92,9 +89,7 @@ public class Disk
 
                 FileChannel channel = new FileOutputStream(file, false).getChannel();
 
-                System.out.println(buffer.toString());
                 buffer.rewind();
-                System.out.println("Writing " + channel.write(buffer, 0) + " bytes");
                 channel.close();
 
 		} catch (Exception e) {
@@ -104,12 +99,9 @@ public class Disk
     }
     private static byte[] toByteArray(BitSet bits, int len) {
         int n = len/8+1;
-        System.out.println("n: " + n);
-        System.out.println("bits.size(): " + len);
         byte[] bytes = new byte[len/8+1];
         for (int i=0; i<bits.size(); i++) {
             if (bits.get(i)) {
-//                bytes[bytes.length-i/8-1] |= 1<<(i%8);
                 bytes[i/bytes.length] |= 1<<(i%8);
             }
         }

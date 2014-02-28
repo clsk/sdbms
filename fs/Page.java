@@ -56,9 +56,15 @@ public class Page
 
         int i = slotMap.nextClearBit(0);
         slots[i] = record;
-        slotMap.set(i, true);
+        slotMap.set(i);
         slotCount++;
         return i;
+    }
+
+    public void setRecordValue(int slot, String record)
+    {
+        slotMap.set(slot);
+        slots[slot] = record;
     }
 
     public void removeRecord(int slot)
@@ -137,9 +143,6 @@ public class Page
     private int capacity;
     private int slotCount;
     private BitSet slotMap;
-
-    // Atributo para Puntero/Llave de la Pagina Anterior.
     private int prevPage;
-    // Atributo para Puntero/Llave de la Pagina Siguiente.
     private int nextPage;
 }
