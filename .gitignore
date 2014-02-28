@@ -9,3 +9,4 @@ bin/
 .idea
 sdbms.iml
 DB/
+.DS_Store

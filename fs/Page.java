@@ -12,11 +12,7 @@ public class Page
     {
         id = _id;
         schema = _schema;
-        capacity = SIZE / _schema.getRecordLength();
-        int t = SIZE - capacity;
-        if (t > ((capacity+7)/8) + 8) {
-            capacity--;
-        }
+        capacity = calcCapacity(_schema.getRecordLength());
 
         slotMap = new BitSet(capacity);
 
@@ -29,15 +25,29 @@ public class Page
         }
     }
 
-    public Page(Schema _schema, String[] _records, BitSet _slotMap)
+    public static int calcCapacity(int recordLength)
+    {
+        int c = SIZE / recordLength;
+        int t = SIZE - c;
+        if (t > ((c+7)/8) + 8) {
+            c--;
+        }
+
+        return c;
+    }
+
+    public Page(Schema _schema, String[] _records, int _prevPage, int _nextPage, BitSet _slotMap)
     {
         schema = _schema;
         slots = _records;
         slotMap = _slotMap;
         capacity = _records.length;
         slotCount = slotMap.cardinality();
+        prevPage = _prevPage;
+        nextPage = _nextPage;
     }
 
+    // Returns slot record was inserted into
     public int addRecord(String record)
     {
         if (slotCount >= capacity) {

@@ -30,5 +30,8 @@ public class Main
         System.out.println("Adding record to slot: " +  page.addRecord(record));
 
         Disk.writePage(page);
+
+        Page rPage = Disk.readPage(catalogSchema, 0);
+        System.out.println("Occupied slots: " + rPage.getSlotMap());
     }
 }
