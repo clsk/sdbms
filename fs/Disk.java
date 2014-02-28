@@ -1,12 +1,17 @@
 package fs;
 
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
+import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 
 public class Disk
 {
-	private static String root = "c:\\DB"; //root por defecto
-	
+    private static String OS = System.getProperty("os.name").toLowerCase();
+    private static String PATH_SEPARATOR = OS.indexOf("win") >= 0 ? "\\" : "/";
+	private static String ROOT = OS.indexOf("win") >= 0 ? "c:\\DB\\"  : "~/dev/sdbms/DB/";
+
     public static Page readPage(String file)
     {
         return null;
@@ -14,40 +19,42 @@ public class Disk
 
     public static void writePage(Page page)
     {
-    	String dirPath = root + "\\" + page.getSchema().getSchemaName();
+        ByteBuffer buffer = ByteBuffer.allocate(page.SIZE);
+        // Write records
+        int index = 0;
+        for (String record : page.getRecords())
+        {
+            try {
+                buffer.put(record.getBytes("US-ACII"), index, record.length());
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+            index += page.getSchema().getRecordLength();
+        }
+
+        // Write Pointers and bitmap towards very end of file
+        byte[] bitmap = page.getSlotMap().toByteArray();
+        // - Calculate index
+        index = page.SIZE - (bitmap.length + 8);
+        // Write pointers and bitmap
+        buffer.putInt(index, page.getPrevPage());
+        buffer.putInt(index+4, page.getNextPage());
+        buffer.put(bitmap, index+8, bitmap.length);
+
+
+    	String dirPath = ROOT + PATH_SEPARATOR +  page.getSchema().getSchemaName();
     	File dir = new File(dirPath);
     	dir.mkdirs(); //Verifica si existe el directorio, sino lo crea
    
-    	String filePath = dirPath + "\\" + page.getID() + ".txt";
+    	String filePath = dirPath + PATH_SEPARATOR + page.getID();
     	File file = new File(filePath);
     	try {
 	    	if(!file.exists()) //Verifica si existe el archivo, sino lo crea
 	    		file.createNewFile();
-	    	
-	    	FileWriter fw = new FileWriter(filePath, true);
-	    	Pair<Integer, Integer> pair = null;
-	    	int size;
-	    	int position;
-	    	String str;
-	    	for (String cadena : page.getRecords()) {
-	    		if(cadena != null){
-	    			for (String field : page.getSchema().getFields().keySet()) {
-	    				pair = page.getSchema().getFields().get(field);
-	    				position = (int)pair.getKey(); //position
-	    				size = (int)pair.getValue(); //size
-	    				
-	    				//En esta parte se colocaran las sub-cadenas para formar el record
-	    				//esto dependera del schema
-					}
-	    			
-	    			//fw.write(cadena); 
-	    		}
-			}
-	    	fw.write(page.getPrevPage());
-	    	fw.write(page.getNextPage());
-	    	//fw.write(page.getSlotMap());
-	    	fw.flush();
-	    	fw.close();
+
+                FileChannel channel = new FileOutputStream(file, false).getChannel();
+                channel.write(buffer);
+                channel.close();
 		} catch (Exception e) {
 			System.out.println("Ha ocurrido un error en el metodo writePage.");
 		}

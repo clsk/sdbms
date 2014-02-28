@@ -12,11 +12,11 @@ public class Schema
     }
     
     /*
-     * Funcion para Agregar un atributo, indicando su nombre, posicion y tamaño.
+     * Funcion para Agregar un atributo, indicando su nombre, posicion y tamaï¿½o.
      */    
     public void addField (String _name, Integer _pos, Integer _size) {
     	if (!fields.containsKey(_name)){
-    		Integer var = _size.intValue() * 2;
+    		Integer var = _size.intValue();
         	Integer pos = _pos.intValue();
         	Pair <Integer, Integer> aux = new Pair <Integer, Integer> (pos, var);    	
         	fields.put(_name.toLowerCase(), aux);
@@ -29,12 +29,12 @@ public class Schema
  
     /*
      * Funcion para Agregar un atributo, indicando su nombre y Pair <Integer, Integer>
-     * el cual indica la posición y el tamaño respectivamente
+     * el cual indica la posiciï¿½n y el tamaï¿½o respectivamente
      */  
     public void addField(String _name, Pair <Integer, Integer> size)
     {
     	if (!fields.containsKey(_name)){
-    		Integer var = size.getValue().intValue() * 2;
+    		Integer var = size.getValue().intValue();
         	Integer pos = size.getKey().intValue();
         	Pair <Integer, Integer> aux = new Pair <Integer, Integer> (pos, var);
         	fields.put(_name.toLowerCase(), aux);
@@ -72,7 +72,7 @@ public class Schema
     }
     
     /*
-     * Funcion de Retorno de la Posición y Tamaño del Atributo.
+     * Funcion de Retorno de la Posiciï¿½n y Tamaï¿½o del Atributo.
      */
     public Pair <Integer, Integer> getFieldPair (String _name){
     	Pair <Integer, Integer> auxPos = null;
@@ -85,7 +85,7 @@ public class Schema
     }
     
     /*
-     * Funcion de Retorno de la Posición del Atributo.
+     * Funcion de Retorno de la Posiciï¿½n del Atributo.
      */
     public Integer getFieldPos (String _name){
     	Integer auxPos = null;
@@ -98,14 +98,14 @@ public class Schema
     }
     
     /*
-     * Funcion para Actualizar el Tamaño del Schema.
+     * Funcion para Actualizar el Tamaï¿½o del Schema.
      */
     private void addRecordLength (int _value){
     	this.recordLength += _value;
     }
     
     /*
-     * Funcion de Retorno de las Parejas de Posicion y Tamaño
+     * Funcion de Retorno de las Parejas de Posicion y Tamaï¿½o
      * de los Atributos.
      */
     public HashMap <String, Pair <Integer, Integer>> getFields (){
@@ -113,7 +113,7 @@ public class Schema
     }
     
     /*
-     * Funcion de Retorno del Tamaño del Schema.
+     * Funcion de Retorno del Tamaï¿½o del Schema.
      */
     public int getRecordLength (){
     	return recordLength;
