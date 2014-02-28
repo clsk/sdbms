@@ -9,16 +9,15 @@ import miniDBMS.Pair;
 
 public class queryParser {
 	public queryParser () {
-		
+		atributes = new Vector <Pair <String, Integer>> ();		
 	}
 	
-	public void readQueryFile () {	
-		String line = null;
-		
+	public void readQueryFile (string path) {	
 		try {
-			BufferedReader reader;
-			reader = new BufferedReader (new FileReader("C:/Users/Isis/programming/javaworkspace/miniDBMS/archivo.txt"));
-			while ((line = reader.readLine()) != null) {
+			BufferedReader reader = new BufferedReader (new FileReader(path));
+			String line = null;
+			lines = new Vector <String> ();
+			while ((line = reader.readLine())  != null) {
 				lines.add(line);
 			}
 			reader.close();
@@ -28,7 +27,7 @@ public class queryParser {
 		}
 	}
 	
-	private void splitQuery() {
+	private void splitQueryCreateTable() {
 		/*
 		 * Create Table Super Query
 		 * Responde a :
@@ -75,11 +74,34 @@ public class queryParser {
 				}
 			}
 		}
-		myPattern = Pattern.compile("(?m)^(INSERT)\\s[\\w]+(,\\s[\\w]+)?\\s(INTO)\\s[\\w]+\\s(VALUES)\\s[\\w]+(,\\s[\\w]+)?;$");
 			
 		myPattern = Pattern.compile("(?m)^(SELECT)\\s\\*\\s(FROM)\\s[\\w]+;$");
 	}
 	
+	/*
+	 * Try parser Insert Into.
+	 */
+	public void splitInsertInto () {
+		Pattern myPattern = Pattern.compile("(?m)^(INSERT)\\s(INTO)\\s[\\w]+\\s\\([\\w]+(,\\s[\\w]+)+?\\)\\s(VALUES)\\s\\('[\\w\\s]+'(,\\s'[\\w\\s]+')+?\\s\\);$");
+		if (!lines.isEmpty()){
+			String line;
+			String [] aux = null;
+			for (int i = 0; i < lines.size(); i++){
+				line = lines.elementAt(i);
+				Matcher matching = myPattern.matcher(line);				
+				if (matching.find()){
+					line = line.replaceAll("\\(|\\)|,|\\s{2,}"," ");
+					aux = line.split("\\s");
+					setTable(aux[2]);
+					for (int j = 3; j < aux.length; j++){
+						
+					}
+				}
+			}			
+		}		
+	}
+	
 	private Vector <Pair <String, Integer>> atributes;
 	private String table;
+	private Vector <String> lines;
 }
