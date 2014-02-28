@@ -7,8 +7,9 @@ public class Page
 {
     public static int SIZE = 16*1024; // 16kb
 
-    public Page(Schema _schema)
+    public Page(Schema _schema, int _id)
     {
+        id = _id;
         schema = _schema;
         capacity = SIZE / _schema.getRecordLength();
         int t = SIZE - capacity;

@@ -5,12 +5,13 @@ import java.io.FileOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.util.BitSet;
 
 public class Disk
 {
     private static String OS = System.getProperty("os.name").toLowerCase();
     private static String PATH_SEPARATOR = OS.indexOf("win") >= 0 ? "\\" : "/";
-	private static String ROOT = OS.indexOf("win") >= 0 ? "c:\\DB\\"  : "~/dev/sdbms/DB/";
+	private static String ROOT = OS.indexOf("win") >= 0 ? "c:\\DB\\"  : "DB/";
 
     public static Page readPage(String file)
     {
@@ -21,25 +22,28 @@ public class Disk
     {
         ByteBuffer buffer = ByteBuffer.allocate(page.SIZE);
         // Write records
-        int index = 0;
-        for (String record : page.getRecords())
+        BitSet slotMap = page.getSlotMap();
+        Schema schema = page.getSchema();
+        String[] records = page.getRecords();
+        for (int i = slotMap.nextSetBit(0); i >= 0; i = slotMap.nextSetBit(i+1))
         {
             try {
-                buffer.put(record.getBytes("US-ACII"), index, record.length());
+                buffer.put(records[i].getBytes("US-ACII"), (i+1)*schema.getRecordLength(), records[i].length());
             } catch (UnsupportedEncodingException e) {
                 e.printStackTrace();
             }
-            index += page.getSchema().getRecordLength();
         }
 
         // Write Pointers and bitmap towards very end of file
-        byte[] bitmap = page.getSlotMap().toByteArray();
+        byte[] bitmap = toByteArray(slotMap);
         // - Calculate index
-        index = page.SIZE - (bitmap.length + 8);
+        int index = page.SIZE - (bitmap.length + 8) - 1;
         // Write pointers and bitmap
         buffer.putInt(index, page.getPrevPage());
+        index += 4;
         buffer.putInt(index+4, page.getNextPage());
-        buffer.put(bitmap, index+8, bitmap.length);
+        index += 4;
+//        buffer.put(bitmap, index, bitmap.length);
 
 
     	String dirPath = ROOT + PATH_SEPARATOR +  page.getSchema().getSchemaName();
@@ -58,5 +62,14 @@ public class Disk
 		} catch (Exception e) {
 			System.out.println("Ha ocurrido un error en el metodo writePage.");
 		}
+    }
+    private static byte[] toByteArray(BitSet bits) {
+        byte[] bytes = new byte[bits.size()/8+1];
+        for (int i=0; i<bits.size(); i++) {
+            if (bits.get(i)) {
+                bytes[bytes.length-i/8-1] |= 1<<(i%8);
+            }
+        }
+        return bytes;
     }
 }
