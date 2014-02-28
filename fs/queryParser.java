@@ -93,8 +93,24 @@ public class queryParser {
 					line = line.replaceAll("\\(|\\)|,|\\s{2,}"," ");
 					aux = line.split("\\s");
 					setTable(aux[2]);
-					for (int j = 3; j < aux.length; j++){
-						
+					line = lines.elementAt(i);
+					line = line.replaceAll("^(INSERT)\\s(INTO)\\s[\\w]+\\s", "");
+					line = line.replaceAll("\\(|\\)|,|\\s{2,}"," ");
+					aux = null;
+					aux = line.split("\\s{2,}");
+					int cant = (aux.length - 2);
+					if (cant%2 == 0) {
+						cant = cant / 2;
+						atriRecord = new Vector <Pair <String, String>>();
+						Pair <String, String> auxp  = new Pair <String, String> ();
+						for (int j = 0; j < cant; j++){
+							auxp.setKey(aux[j]);
+							auxp.setValue(aux[cant + j + 1]);
+							atriRecord.add(auxp);
+						}
+					}
+					else {
+						System.out.print("La Cantidad de valores a Insertar no Coincide con la Cantidad de Atributos.");
 					}
 				}
 			}			
