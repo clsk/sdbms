@@ -5,20 +5,18 @@ import java.lang.Integer;
 
 import static java.util.Map.Entry;
 
-class FieldValueCompare implements Comparator<FieldValue>
-{
-    @Override
-    public int compare(FieldValue o1, FieldValue o2) {
-        return o1.pos - o2.pos;
-    }
-}
-
 public class Schema
 {
-    public Schema(String name)
+    public Schema(String name, int _lastPageNum)
     {
         fields = new HashMap <String, FieldValue>();
         this.name = name;
+        lastPageNum = _lastPageNum;
+    }
+
+    public int getNewPageNum()
+    {
+        return ++lastPageNum;
     }
     
     /*
@@ -121,4 +119,5 @@ public class Schema
 	private HashMap <String, FieldValue> fields;
     private String name = null;
     private int recordLength = 0;
+    private int lastPageNum = 0;
 }

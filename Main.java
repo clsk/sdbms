@@ -5,12 +5,13 @@ import java.util.Map;
 public class Main
 {
     public static void main(String[] args) {
-        Schema catalogSchema = new Schema("SYSTEMCATALOG");
+        Schema catalogSchema = new Schema("SYSTEMCATALOG", 0);
         catalogSchema.addField("name", 0, 128);
         catalogSchema.addField("free", 1, 10);
         catalogSchema.addField("occupied", 2, 10);
+        catalogSchema.addField("lastPageNum", 3, 10);
 
-        Schema catalogFieldSchema = new Schema("CATALOGFIELD");
+        Schema catalogFieldSchema = new Schema("CATALOGFIELD", 0);
         catalogFieldSchema.addField("catalogID", 0, 20);
         catalogFieldSchema.addField("name", 1, 32);
         catalogFieldSchema.addField("pos", 2, 3);
@@ -26,7 +27,8 @@ public class Main
         String name = Utilities.padRight("SYSTEMCATALOG", 128);
         String free = Utilities.padRight("0", 10);
         String occupied = Utilities.padRight("-1", 10);
-        String record = name + free + occupied;
+        String lastPageNum = Utilities.padRight("0", 10);
+        String record = name + free + occupied + lastPageNum;
         System.out.println("Record len: " + record.length());
         System.out.println("Adding record to slot: " +  page.addRecord(record));
 
