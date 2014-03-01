@@ -8,13 +8,13 @@ public class Record
 {
     public Record(Schema _schema)
     {
-        data = new String[schema.getFieldCount()];
+        data = new String[_schema.getFieldCount()];
         schema = _schema;
     }
 
-    public Record(Schema _schema, String [] data)
+    public Record(Schema _schema, String [] _data)
     {
-        data = data;
+        data = _data;
         schema = _schema;
     }
 
@@ -39,7 +39,7 @@ public class Record
         String record = "";
         for (String field : data)
         {
-            record += data;
+            record += field;
         }
 
         return record;
@@ -54,6 +54,7 @@ public class Record
         {
             data[i] = record.substring(index, index+field.getValue().size);
             index += field.getValue().size;
+            i++;
         }
 
         return new Record(schema, data);

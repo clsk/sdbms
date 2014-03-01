@@ -5,17 +5,12 @@ import java.util.Map;
 public class Main
 {
     public static void main(String[] args) {
+        /*
         Schema catalogSchema = new Schema("SYSTEMCATALOG", 0);
         catalogSchema.addField("name", 0, 128);
         catalogSchema.addField("free", 1, 10);
         catalogSchema.addField("occupied", 2, 10);
         catalogSchema.addField("lastPageNum", 3, 10);
-
-        Schema catalogFieldSchema = new Schema("CATALOGFIELD", 0);
-        catalogFieldSchema.addField("catalogID", 0, 20);
-        catalogFieldSchema.addField("name", 1, 32);
-        catalogFieldSchema.addField("pos", 2, 3);
-        catalogFieldSchema.addField("length", 3, 5);
 
         System.out.println("SYSTEMCATALOG Record Length: " + catalogSchema.getRecordLength());
         Page page = new Page(catalogSchema, 0);
@@ -36,10 +31,45 @@ public class Main
 
         Page rPage = Disk.readPage(catalogSchema, 0);
         System.out.println("Occupied slots: " + rPage.getSlotMap());
+        Record r = Record.valueOf(catalogSchema, rPage.getRecord(0));
 
-        for (Map.Entry<String, FieldValue> field : catalogFieldSchema.getSortedFields())
+        for (Map.Entry<String, FieldValue> field : catalogSchema.getSortedFields())
         {
             System.out.println("" + field.getValue().pos + ": " + field.getKey() + "(" + field.getValue().size + ")");
         }
+        */
+
+        // SYSTEMCATALOGFIELDS
+        Schema catalogFieldSchema = new Schema("SYSTEMCATALOGFIELDS", 0);
+        catalogFieldSchema.addField("catalogID", 0, 20);
+        catalogFieldSchema.addField("name", 1, 32);
+        catalogFieldSchema.addField("pos", 2, 3);
+        catalogFieldSchema.addField("length", 3, 5);
+        Record catalogRecord = new Record(catalogFieldSchema);
+        catalogRecord.setData("catalogID", "0|0");
+        catalogRecord.setData("name", "name");
+        catalogRecord.setData("pos", "0");
+        catalogRecord.setData("length", "128");
+        Page p2 = new Page(catalogFieldSchema, 0);
+
+        catalogRecord.setData("catalogID", "0|0");
+        catalogRecord.setData("name", "free");
+        catalogRecord.setData("pos", "1");
+        catalogRecord.setData("length", "10");
+        String rs = catalogRecord.toString();
+        System.out.println(p2.addRecord(rs));
+
+        catalogRecord.setData("catalogID", "0|0");
+        catalogRecord.setData("name", "occupied");
+        catalogRecord.setData("pos", "2");
+        catalogRecord.setData("length", "10");
+        System.out.println(p2.addRecord(catalogRecord.toString()));
+
+        catalogRecord.setData("catalogID", "0|0");
+        catalogRecord.setData("name", "lastPageNum");
+        catalogRecord.setData("pos", "3");
+        catalogRecord.setData("length", "10");
+        System.out.println(p2.addRecord(catalogRecord.toString()));
+        Disk.writePage(p2);
     }
 }

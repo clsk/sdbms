@@ -72,6 +72,11 @@ public class Page
         slotMap.clear(slot);
     }
 
+    public String getRecord(int slot)
+    {
+        return slotMap.get(slot) ? slots[slot] : null;
+    }
+
     public String[] getRecords()
     {
         return slots;

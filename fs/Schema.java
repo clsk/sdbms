@@ -23,7 +23,7 @@ public class Schema
      * Funcion para Agregar un atributo, indicando su nombre, posicion y tama�o.
      */    
     public void addField (String _name, Integer _pos, Integer _size) {
-    	if (!fields.containsKey(_name)){
+    	if (!fields.containsKey(_name.toLowerCase())){
         	fields.put(_name.toLowerCase(), new FieldValue(_pos, _size));
         	increaseRecordLength(_size);
     	}
@@ -38,7 +38,7 @@ public class Schema
      */  
     public void addField(String _name, FieldValue fieldValue)
     {
-    	if (!fields.containsKey(_name)){
+    	if (!fields.containsKey(_name.toLowerCase())){
         	fields.put(_name.toLowerCase(), new FieldValue(fieldValue));
         	increaseRecordLength(fieldValue.size);
     	}
@@ -69,14 +69,14 @@ public class Schema
      * Funcion de Retorno de la Posici�n y Tama�o del Atributo.
      */
     public FieldValue getFieldPair (String _name){
-    	return fields.get(_name);
+    	return fields.get(_name.toLowerCase());
     }
     
     /*
      * Funcion de Retorno de la Posici�n del Atributo.
      */
     public Integer getFieldPos (String _name){
-        FieldValue field = fields.get(_name);
+        FieldValue field = fields.get(_name.toLowerCase());
         return field != null ? field.pos : null;
 
     }
