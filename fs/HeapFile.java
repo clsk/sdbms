@@ -111,7 +111,11 @@ public class HeapFile
         else if (page.getNextPage() == Page.NULL_ID)
             return null;
         else
-            return Disk.readPage(schema, page.getNextPage());
+        {
+            int nextPage = page.getNextPage();
+            page = null; // set to null stack doesn't get too big
+            return Disk.readPage(schema, nextPage);
+        }
     }
 
     public ArrayList<Pair<RID, String>> getAllRecords()
@@ -135,7 +139,9 @@ public class HeapFile
 
         if (page.getNextPage() != Page.NULL_ID)
         {
-            Page nextPage = Disk.readPage(schema, page.getNextPage());
+            int nextPageId = page.getNextPage();
+            page = null;
+            Page nextPage = Disk.readPage(schema, nextPageId);
             records.addAll(getAllRecords(nextPage));
         }
 
