@@ -53,8 +53,12 @@ public class Disk
         return null;
     }
 
-    public static void writePage(Page page)
+    public static Boolean writePage(Page page)
     {
+        // Don't do anything if page is null
+        if (page == null)
+            return false;
+
         ByteBuffer buffer = ByteBuffer.allocate(page.SIZE);
         // Write records
         BitSet slotMap = page.getSlotMap();
@@ -96,6 +100,8 @@ public class Disk
 			System.out.println("Ha ocurrido un error en el metodo writePage: " + e.getMessage());
             e.printStackTrace();
 		}
+
+        return true;
     }
     private static byte[] toByteArray(BitSet bits, int len) {
         int n = len/8+1;

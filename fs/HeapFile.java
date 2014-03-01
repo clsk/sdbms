@@ -1,5 +1,8 @@
 package fs;
 
+import java.util.ArrayList;
+import java.util.BitSet;
+
 public class HeapFile
 {
     public HeapFile(Schema _schema, Page _free, Page _occupied)
@@ -15,18 +18,22 @@ public class HeapFile
         RID rid = new RID(free.getID(), id);
         if (free.getEmptySlotCount() == 0)
         {
-            occupied.setPrevPage(free.getID());
-            free.setNextPage(occupied.getID());
-            Disk.writePage(occupied);
-            Disk.writePage(free);
+            if (occupied != null)
+            {
+                occupied.setPrevPage(free.getID());
+                free.setNextPage(occupied.getID());
+                Disk.writePage(occupied);
+            }
+
             Page newFree;
-            if (free.getNextPage() == -1) {
+            if (free.getNextPage() == Page.NULL_ID) {
                 newFree = new Page(schema, schema.getNewPageNum());
-                newFree.setNextPage(-1);
+                newFree.setNextPage(Page.NULL_ID);
             } else {
                 newFree = Disk.readPage(schema, free.getNextPage());
             }
-            newFree.setPrevPage(-1);
+            newFree.setPrevPage(Page.NULL_ID);
+            Disk.writePage(free);
             occupied = free;
             free = newFree;
         }
@@ -39,7 +46,42 @@ public class HeapFile
     {
         Page page = getPage(rid.pageId);
         if (page != null)
+        {
+            Boolean needToMove = page.getEmptySlotCount() == 0;
             page.removeRecord(rid.offset);
+
+            if (needToMove)
+            {
+                // This page was full, Move to empty list
+                Page prevPage = null, nextPage = null;
+                if (page.getPrevPage() != Page.NULL_ID)
+                    prevPage = Disk.readPage(schema, page.getPrevPage());
+                if (page.getNextPage() != Page.NULL_ID)
+                    nextPage = Disk.readPage(schema, page.getNextPage());
+
+                if (prevPage == null)
+                {
+                    occupied = nextPage;
+                    if (nextPage != null)
+                        nextPage.setPrevPage(Page.NULL_ID);
+                }
+                else if (nextPage != null)
+                {
+                    nextPage.setPrevPage(prevPage.getID());
+                    prevPage.setNextPage(nextPage.getID());
+                } else
+                {
+                    prevPage.setNextPage(Page.NULL_ID);
+                }
+                Disk.writePage(nextPage);
+                Disk.writePage(prevPage);
+
+                page.setNextPage(free.getID());
+                free.setPrevPage(page.getID());
+                Disk.writePage(free);
+                free = page;
+            }
+        }
 
         Disk.writePage(page);
     }
@@ -66,10 +108,38 @@ public class HeapFile
     {
         if (page.getID() == pageId)
             return page;
-        else if (page.getNextPage() == -1)
+        else if (page.getNextPage() == Page.NULL_ID)
             return null;
         else
             return Disk.readPage(schema, page.getNextPage());
+    }
+
+    public ArrayList<Pair<RID, String>> getAllRecords()
+    {
+        ArrayList<Pair<RID, String>> records = new ArrayList<Pair<RID, String>>();
+        if (occupied != null)
+            records.addAll(getAllRecords(occupied));
+
+        records.addAll(getAllRecords(free));
+        return records;
+    }
+
+    public ArrayList<Pair<RID, String>> getAllRecords(Page page)
+    {
+        ArrayList<Pair<RID, String>> records = new ArrayList<Pair<RID, String>>(page.getSlotCount());
+        BitSet bs = page.getSlotMap();
+        for (int i = bs.nextSetBit(0); i >= 0; i = bs.nextSetBit(i+1))
+        {
+            records.add(new Pair<RID, String>(new RID(page.getID(), i), page.getRecord(i)));
+        }
+
+        if (page.getNextPage() != Page.NULL_ID)
+        {
+            Page nextPage = Disk.readPage(schema, page.getNextPage());
+            records.addAll(getAllRecords(nextPage));
+        }
+
+        return records;
     }
 
     Schema schema;

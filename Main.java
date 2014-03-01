@@ -1,11 +1,12 @@
 import fs.*;
 import java.lang.System;
+import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.Map;
 
 public class Main
 {
     public static void main(String[] args) {
-        /*
         Schema catalogSchema = new Schema("SYSTEMCATALOG", 0);
         catalogSchema.addField("name", 0, 128);
         catalogSchema.addField("free", 1, 10);
@@ -29,15 +30,11 @@ public class Main
 
         Disk.writePage(page);
 
-        Page rPage = Disk.readPage(catalogSchema, 0);
-        System.out.println("Occupied slots: " + rPage.getSlotMap());
-        Record r = Record.valueOf(catalogSchema, rPage.getRecord(0));
-
         for (Map.Entry<String, FieldValue> field : catalogSchema.getSortedFields())
         {
             System.out.println("" + field.getValue().pos + ": " + field.getKey() + "(" + field.getValue().size + ")");
         }
-        */
+
 
         // SYSTEMCATALOGFIELDS
         Schema catalogFieldSchema = new Schema("SYSTEMCATALOGFIELDS", 0);
@@ -71,5 +68,28 @@ public class Main
         catalogRecord.setData("length", "10");
         System.out.println(p2.addRecord(catalogRecord.toString()));
         Disk.writePage(p2);
+
+
+        Schema[] schemas = readCatalog(catalogSchema, catalogFieldSchema);
+        for (Schema schema : schemas)
+        {
+            System.out.println("Schema: " + schema.getSchemaName());
+        }
+    }
+
+    static private Schema[] readCatalog(Schema catalogSchema, Schema catalogFieldsSchema)
+    {
+         // Read Catalog
+        HeapFile hpf = new HeapFile(catalogSchema, Disk.readPage(catalogSchema, 0), null);
+        ArrayList<Pair<RID, String>> records = hpf.getAllRecords();
+        Schema[] ret = new Schema[records.size()];
+        int i = 0;
+        for (Pair<RID, String> record : records)
+        {
+            Record r = Record.valueOf(catalogSchema, record.getValue());
+            ret[i] = new Schema(r.getValueForField("name"), Integer.parseInt(r.getValueForField("lastPageNum").trim()));
+        }
+
+        return ret;
     }
 }

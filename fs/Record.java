@@ -33,6 +33,12 @@ public class Record
         data[fv.pos] = Utilities.padRight(value, fv.size);
     }
 
+    public String getValueForField(String field)
+    {
+        Integer pos = schema.getFieldPos(field);
+        return pos != null ? data[pos] : null;
+    }
+
     @Override
     public String toString()
     {

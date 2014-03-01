@@ -7,6 +7,7 @@ import java.util.BitSet;
 public class Page
 {
     public static int SIZE = 16*1024; // 16kb
+    public static int NULL_ID = -1;
 
     public Page(Schema _schema, int _id)
     {
@@ -23,6 +24,9 @@ public class Page
             Arrays.fill(empty, ' ');
             slots[i] = new String(empty);
         }
+
+        nextPage = NULL_ID;
+        prevPage = NULL_ID;
     }
 
     public static int calcCapacity(int recordLength)
@@ -67,9 +71,15 @@ public class Page
         slots[slot] = record;
     }
 
-    public void removeRecord(int slot)
+    public Boolean removeRecord(int slot)
     {
-        slotMap.clear(slot);
+        if (slotMap.get(slot))
+        {
+            slotMap.clear(slot);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public String getRecord(int slot)
