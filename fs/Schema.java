@@ -115,6 +115,11 @@ public class Schema
     public int getRecordLength (){
     	return recordLength;
     }
+
+    public int getFieldCount()
+    {
+        return fields.size();
+    }
     
 	private HashMap <String, FieldValue> fields;
     private String name = null;
