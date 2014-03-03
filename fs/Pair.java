@@ -4,6 +4,11 @@ public class Pair <T, V> {
     private T key = null;
     private V value = null;
 
+    public Pair()
+    {
+
+    }
+
     public Pair (T theKey, V theValue){
         key = theKey;
         value = theValue;
