@@ -17,6 +17,9 @@ public class Disk
 
     public static Page readPage(Schema schema, int pageId)
     {
+        if (pageId == Page.NULL_ID)
+            return null;
+
         String dirPath = ROOT + PATH_SEPARATOR +  schema.getSchemaName();
     	File dir = new File(dirPath);
     	dir.mkdirs(); //Verifica si existe el directorio, sino lo crea
@@ -61,8 +64,8 @@ public class Disk
 
         ByteBuffer buffer = ByteBuffer.allocate(page.SIZE);
         // Write records
-        BitSet slotMap = page.getSlotMap();
-        Schema schema = page.getSchema();
+        final BitSet slotMap = page.getSlotMap();
+        final Schema schema = page.getSchema();
         String[] records = page.getRecords();
         for (String record : records)
         {
@@ -103,6 +106,56 @@ public class Disk
 
         return true;
     }
+
+    static public Boolean writeHead(Schema schema, Head head)
+    {
+        if (schema == null | head == null)
+            return false;
+
+        String dirPath = ROOT + PATH_SEPARATOR +  schema.getSchemaName();
+    	File dir = new File(dirPath);
+    	dir.mkdirs(); //Verifica si existe el directorio, sino lo crea
+
+    	String filePath = dirPath + PATH_SEPARATOR + "head";
+    	File file = new File(filePath);
+    	try {
+	    	if(!file.exists()) //Verifica si existe el archivo, sino lo crea
+	    		file.createNewFile();
+
+            Files.write(file.toPath(), head.getData());
+
+        } catch (Exception e) {
+			System.out.println("Ha ocurrido un error en el metodo writePage: " + e.getMessage());
+            e.printStackTrace();
+		}
+
+        return true;
+    }
+
+    static public Head readHead(Schema schema)
+    {
+
+        String dirPath = ROOT + PATH_SEPARATOR +  schema.getSchemaName();
+    	File dir = new File(dirPath);
+    	dir.mkdirs(); //Verifica si existe el directorio, sino lo crea
+
+    	String filePath = dirPath + PATH_SEPARATOR + "head";
+    	File file = new File(filePath);
+    	try {
+	    	if(!file.exists()) //Verifica si existe el archivo, sino lo crea
+                throw new Error("Error Opening File: File " + filePath + " does not exist");
+
+
+            final byte[] buffer = Files.readAllBytes(file.toPath());
+            return new Head(buffer);
+        } catch (Exception e) {
+			System.out.println("Ha ocurrido un error en el metodo writePage: " + e.getMessage());
+            e.printStackTrace();
+		}
+
+        return null;
+    }
+
     private static byte[] toByteArray(BitSet bits, int len) {
         int n = len/8+1;
         byte[] bytes = new byte[len/8+1];

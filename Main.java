@@ -9,8 +9,6 @@ public class Main
     public static void main(String[] args) {
         Schema catalogSchema = new Schema("SYSTEMCATALOG", 0);
         catalogSchema.addField("name", 0, 128);
-        catalogSchema.addField("free", 1, 10);
-        catalogSchema.addField("occupied", 2, 10);
         catalogSchema.addField("lastPageNum", 3, 10);
 
         System.out.println("SYSTEMCATALOG Record Length: " + catalogSchema.getRecordLength());
@@ -69,7 +67,6 @@ public class Main
         System.out.println(p2.addRecord(catalogRecord.toString()));
         Disk.writePage(p2);
 
-
         Schema[] schemas = readCatalog(catalogSchema, catalogFieldSchema);
         for (Schema schema : schemas)
         {
@@ -80,14 +77,15 @@ public class Main
     static private Schema[] readCatalog(Schema catalogSchema, Schema catalogFieldsSchema)
     {
          // Read Catalog
-        HeapFile hpf = new HeapFile(catalogSchema, Disk.readPage(catalogSchema, 0), null);
+        HeapFile hpf = new HeapFile(catalogSchema);
         ArrayList<Pair<RID, String>> records = hpf.getAllRecords();
         Schema[] ret = new Schema[records.size()];
         int i = 0;
         for (Pair<RID, String> record : records)
         {
             Record r = Record.valueOf(catalogSchema, record.getValue());
-            ret[i] = new Schema(r.getValueForField("name"), Integer.parseInt(r.getValueForField("lastPageNum").trim()));
+            ret[i] = new Schema(r.getValueForField("name").trim(), Integer.parseInt(r.getValueForField("lastPageNum").trim()));
+            i++;
         }
 
         return ret;

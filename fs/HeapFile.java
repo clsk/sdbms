@@ -5,11 +5,12 @@ import java.util.BitSet;
 
 public class HeapFile
 {
-    public HeapFile(Schema _schema, Page _free, Page _occupied)
+    public HeapFile(Schema _schema)
     {
         schema = _schema;
-        free = _free;
-        occupied = _occupied;
+        head = Disk.readHead(schema);
+        free = Disk.readPage(schema, head.getFree());
+        occupied = Disk.readPage(schema, head.getOccupied());
     }
 
     public RID addRecord(String record)
@@ -34,8 +35,8 @@ public class HeapFile
             }
             newFree.setPrevPage(Page.NULL_ID);
             Disk.writePage(free);
-            occupied = free;
-            free = newFree;
+            setOccupied(free);
+            setFree(newFree);
         }
 
         Disk.writePage(free);
@@ -61,7 +62,7 @@ public class HeapFile
 
                 if (prevPage == null)
                 {
-                    occupied = nextPage;
+                    setOccupied(nextPage);
                     if (nextPage != null)
                         nextPage.setPrevPage(Page.NULL_ID);
                 }
@@ -79,7 +80,7 @@ public class HeapFile
                 page.setNextPage(free.getID());
                 free.setPrevPage(page.getID());
                 Disk.writePage(free);
-                free = page;
+                setFree(page);
             }
         }
 
@@ -93,6 +94,7 @@ public class HeapFile
         Disk.writePage(page);
     }
 
+    // Attempt to find a page in free and occupied list
     public Page getPage(int pageId)
     {
         Page page = getPage(occupied, pageId);
@@ -104,6 +106,7 @@ public class HeapFile
         return page;
     }
 
+    // Attempt to find a page recursively
     public Page getPage(Page page, int pageId)
     {
         if (page.getID() == pageId)
@@ -113,11 +116,12 @@ public class HeapFile
         else
         {
             int nextPage = page.getNextPage();
-            page = null; // set to null stack doesn't get too big
+            page = null; // set to null so stack doesn't get too big
             return Disk.readPage(schema, nextPage);
         }
     }
 
+    // Get all records from free and occupied lists
     public ArrayList<Pair<RID, String>> getAllRecords()
     {
         ArrayList<Pair<RID, String>> records = new ArrayList<Pair<RID, String>>();
@@ -128,6 +132,7 @@ public class HeapFile
         return records;
     }
 
+    // Get all records from a list recursively
     public ArrayList<Pair<RID, String>> getAllRecords(Page page)
     {
         ArrayList<Pair<RID, String>> records = new ArrayList<Pair<RID, String>>(page.getSlotCount());
@@ -140,7 +145,7 @@ public class HeapFile
         if (page.getNextPage() != Page.NULL_ID)
         {
             int nextPageId = page.getNextPage();
-            page = null;
+            page = null; // Set page to null so stack doesn't get too big
             Page nextPage = Disk.readPage(schema, nextPageId);
             records.addAll(getAllRecords(nextPage));
         }
@@ -148,7 +153,25 @@ public class HeapFile
         return records;
     }
 
+    private void setFree(Page page)
+    {
+        free = page;
+        head.setFree(page.getID());
+    }
+
+    private void setOccupied(Page page)
+    {
+        occupied = page;
+        head.setOccupied(page == null ? -1 : page.getID());
+    }
+
+    public Schema getSchema()
+    {
+        return schema;
+    }
+
     Schema schema;
+    Head head;
     Page free;
     Page occupied;
 }
