@@ -4,16 +4,21 @@ import java.nio.ByteBuffer;
 
 public class Head {
 
+    public Head()
+    {
+        data = new byte[8];
+    }
+
     public Head(byte[] _data)
     {
-        if (data.length != 8)
+        if (_data == null || _data.length != 8)
             throw new Error("Head data needs to be 8 bytes long");
-        _data = data;
+        data = _data;
     }
 
     public Head(Integer free, Integer occupied)
     {
-        byte[] data = new byte[8];
+        data = new byte[8];
         setFree(free);
         setOccupied(occupied);
     }
@@ -21,13 +26,13 @@ public class Head {
     void setFree(Integer free)
     {
 
-        System.arraycopy(free.byteValue(), 0, data, 0, 4);
+        ByteBuffer.wrap(data).putInt(0, free);
     }
 
     void setOccupied(Integer occupied)
     {
 
-        System.arraycopy(occupied.byteValue(), 0, data, 4, 8);
+        ByteBuffer.wrap(data).putInt(4, occupied);
     }
 
     Integer getFree()

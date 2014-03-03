@@ -13,6 +13,13 @@ public class HeapFile
         occupied = Disk.readPage(schema, head.getOccupied());
     }
 
+    public HeapFile(Schema _schema, Page _free, Page _occupied)
+    {
+        schema = _schema;
+        setFree(_free);
+        setOccupied(_occupied);
+    }
+
     public RID addRecord(String record)
     {
         int id = free.addRecord(record);
@@ -162,7 +169,7 @@ public class HeapFile
     private void setOccupied(Page page)
     {
         occupied = page;
-        head.setOccupied(page == null ? -1 : page.getID());
+        head.setOccupied(page == null ? Page.NULL_ID : page.getID());
     }
 
     public Schema getSchema()

@@ -2,18 +2,21 @@ package fs;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.BitSet;
 
 public class Disk
 {
     private static String OS = System.getProperty("os.name").toLowerCase();
-    private static String PATH_SEPARATOR = OS.indexOf("win") >= 0 ? "\\" : "/";
-	private static String ROOT = OS.indexOf("win") >= 0 ? "c:\\DB\\"  : "DB/";
+    private static String PATH_SEPARATOR = OS.contains("win") ? "\\" : "/";
+	private static String ROOT = OS.contains("win") ? "c:\\DB\\"  : "DB/";
 
     public static Page readPage(Schema schema, int pageId)
     {
@@ -62,7 +65,7 @@ public class Disk
         if (page == null)
             return false;
 
-        ByteBuffer buffer = ByteBuffer.allocate(page.SIZE);
+        ByteBuffer buffer = ByteBuffer.allocate(Page.SIZE);
         // Write records
         final BitSet slotMap = page.getSlotMap();
         final Schema schema = page.getSchema();
@@ -125,7 +128,7 @@ public class Disk
             Files.write(file.toPath(), head.getData());
 
         } catch (Exception e) {
-			System.out.println("Ha ocurrido un error en el metodo writePage: " + e.getMessage());
+			System.out.println("Ha ocurrido un error en el metodo writeHead: " + e.getMessage());
             e.printStackTrace();
 		}
 
@@ -149,11 +152,16 @@ public class Disk
             final byte[] buffer = Files.readAllBytes(file.toPath());
             return new Head(buffer);
         } catch (Exception e) {
-			System.out.println("Ha ocurrido un error en el metodo writePage: " + e.getMessage());
+			System.out.println("Ha ocurrido un error en el metodo readHead: " + e.getMessage());
             e.printStackTrace();
 		}
 
         return null;
+    }
+
+    static public void deleteTable(String schemaName) throws IOException {
+        String dirPath = ROOT + PATH_SEPARATOR +  schemaName;
+        Files.deleteIfExists(Paths.get(dirPath));
     }
 
     private static byte[] toByteArray(BitSet bits, int len) {
