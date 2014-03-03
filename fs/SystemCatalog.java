@@ -31,7 +31,7 @@ public class SystemCatalog {
             r.setData("name", schema.getSchemaName());
             r.setData("lastPageNum", "0");
 
-            catalogHeap.addRecord(r.toString());
+            catalogHeap.addRecord(r);
             for (Entry<String, FieldValue> entry : schema.getFields().entrySet())
             {
                 r = new Record(catalogFieldsHeap.getSchema());
@@ -39,7 +39,7 @@ public class SystemCatalog {
                 r.setData("name", entry.getKey());
                 r.setData("pos", Integer.toString(entry.getValue().pos));
                 r.setData("size", Integer.toString(entry.getValue().size));
-                catalogFieldsHeap.addRecord(r.toString());
+                catalogFieldsHeap.addRecord(r);
             }
             return true;
         }

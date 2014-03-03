@@ -50,6 +50,11 @@ public class HeapFile
         return rid;
     }
 
+    public RID addRecord(Record record)
+    {
+        return addRecord(record.toString());
+    }
+
     public void removeRecord(RID rid)
     {
         Page page = getPage(rid.pageId);
