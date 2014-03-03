@@ -12,6 +12,10 @@ public class queryParser {
 				
 	}
 	
+	/**
+	 * Lectura de Archivo que contiene el Create Table
+	 * y Insert Into para una tabla en especifico.
+	 */
 	public void readQueryFile (String pathQuery ) {	
 		try {
 			BufferedReader reader = new BufferedReader (new FileReader(pathQuery));
@@ -24,6 +28,7 @@ public class queryParser {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			System.out.print(e);
 		}
 	}
 	
@@ -67,10 +72,14 @@ public class queryParser {
 		}		
 	}
 	
+	/**
+	 * Funcion para obtener los registros que seran insertados a la tabla.
+	 */
 	public void splitInsertInto () {
 		Pattern myPattern = Pattern.compile("(?m)^(INSERT)\\s(INTO)\\s[\\w]+\\s\\([\\w]+(,\\s[\\w]+)+?\\)\\s(VALUES)\\s\\('[\\w\\s]+'(,\\s'[\\w\\s]+')+?\\s\\);$");
 		if (!lines.isEmpty()){
 			String line;
+			atriRecord = new Vector <Pair <String, String>> ();
 			String [] aux = null;
 			for (int i = 0; i < lines.size(); i++){
 				line = lines.elementAt(i);
@@ -87,12 +96,12 @@ public class queryParser {
 					int cant = (aux.length - 2);
 					if (cant%2 == 0) {
 						cant = cant / 2;
-						atriRecord = new Vector <Pair <String, String>>();
-						Pair <String, String> auxp  = new Pair <String, String> ();
 						for (int j = 0; j < cant; j++){
+							Pair <String, String> auxp  = new Pair <String, String> ();
 							auxp.setKey(aux[j]);
 							auxp.setValue(aux[cant + j + 1]);
 							atriRecord.add(auxp);
+							auxp = null;
 						}
 					}
 					else {
@@ -120,7 +129,21 @@ public class queryParser {
 	public void setTable(String table) {
 		this.table = table;
 	}
-
+	
+	/**
+	 * Funcion de Retorno de Los Records a ser insetados.
+	 */
+	public Vector <Pair <String, String>> GetRecords (){
+		return atriRecord;
+	}
+	
+	/**
+	 * @return Los Atributos y las Posiciones que le corresponden en la tabla.
+	 */
+	public Vector <Pair <String, Integer>> GetAtributes () {
+		return atributes;
+	}
+	
 	private Vector <Pair <String, Integer>> atributes;
 	private Vector <Pair <String, String>> atriRecord;
 	private String table;
