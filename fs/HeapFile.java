@@ -101,10 +101,19 @@ public class HeapFile
         Disk.writePage(page);
     }
 
+    public String getRecord(RID rid)
+    {
+        Page page = getPage(rid.pageId);
+        return page.getRecord(rid.offset);
+    }
+
     // Attempt to find a page in free and occupied list
     public Page getPage(int pageId)
     {
-        Page page = getPage(occupied, pageId);
+        Page page = null;
+        if (occupied != null)
+            page = getPage(occupied, pageId);
+
         if (page == null)
         {
             page = getPage(free, pageId);

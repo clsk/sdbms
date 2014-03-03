@@ -65,19 +65,16 @@ public class Main
         Disk.writePage(p2);
         Disk.writeHead(catalogFieldSchema, new Head(0, -1));
 
-        Collection<Schema> schemas = buildCatalog(catalogSchema, catalogFieldSchema).values();
-        for (Schema schema : schemas)
-        {
-            System.out.println("Schema: " + schema.getSchemaName());
-        }
+        SystemCatalog sc = buildCatalog(catalogSchema, catalogFieldSchema);
+        System.out.println("1st record: " + sc.getTable("SYSTEMCATALOG").getRecord(new RID(0, 0)));
     }
 
-    static private HashMap<String, Schema> buildCatalog(Schema catalogSchema, Schema catalogFieldsSchema)
+    static private SystemCatalog buildCatalog(Schema catalogSchema, Schema catalogFieldsSchema)
     {
          // Read Catalog
         HeapFile hpfCatalog = new HeapFile(catalogSchema);
         ArrayList<Pair<RID, String>> records = hpfCatalog.getAllRecords();
-        HashMap<String, Schema> schemas = new HashMap<String, Schema>();
+        HashMap<String, Schema> schemas = new HashMap<String, Schema>(records.size());
         for (Pair<RID, String> record : records)
         {
             Record r = Record.valueOf(catalogSchema, record.getValue());
@@ -93,6 +90,12 @@ public class Main
             schema.addField(r.getValueForField("name").trim(), Integer.parseInt(r.getValueForField("pos").trim()), Integer.parseInt(r.getValueForField("size").trim()));
         }
 
-        return schemas;
+        HashMap<String, HeapFile> heapFiles = new HashMap<String, HeapFile>(schemas.size());
+        for (Schema schema : schemas.values())
+        {
+            heapFiles.put(schema.getSchemaName(), new HeapFile(schema));
+        }
+
+        return new SystemCatalog(heapFiles);
     }
 }
