@@ -1,3 +1,5 @@
+package fs;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -5,16 +7,14 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import miniDBMS.Pair;
-
 public class queryParser {
 	public queryParser () {
-		atributes = new Vector <Pair <String, Integer>> ();		
+				
 	}
 	
-	public void readQueryFile (string path) {	
+	public void readQueryFile (String pathQuery ) {	
 		try {
-			BufferedReader reader = new BufferedReader (new FileReader(path));
+			BufferedReader reader = new BufferedReader (new FileReader(pathQuery));
 			String line = null;
 			lines = new Vector <String> ();
 			while ((line = reader.readLine())  != null) {
@@ -27,28 +27,19 @@ public class queryParser {
 		}
 	}
 	
-	private void splitQueryCreateTable() {
-		/*
-		 * Create Table Super Query
-		 * Responde a :
-		 * Create Table NameTable (
-		 * atributoName varchar length,
-		 * atributoName varchar length,
-		 * );
-		 * 
-		 * Testeado :P
-		 */
+	public void splitQueryCreateTable() {
 		Pattern myPattern = Pattern.compile("(?m)^(create table|CREATE TABLE)\\s[\\w]+\\s\\(");		
 		
 		if (!lines.isEmpty()){
 			Matcher matching = myPattern.matcher(lines.elementAt(0));
 			if (matching.find()){
+				atributes = new Vector <Pair <String, Integer>> ();
 				String line = lines.elementAt(0);
 				String [] aux = line.split("\\s");
 				setTable((aux[2]));
 				aux = null;				
 				for (int i = 1; i < lines.size(); i++){
-					myPattern = Pattern.compile("(?m)[\\w]+\\s(varchar|VARCHAR)\\s[\\d]+,$");
+					myPattern = Pattern.compile("(?m)^[\\w]+\\s(varchar|VARCHAR)\\s[\\d]+,$");
 					line = lines.elementAt(i);
 					matching = myPattern.matcher(line);
 					if (matching.find()){
@@ -73,14 +64,9 @@ public class queryParser {
 						break;
 				}
 			}
-		}
-			
-		myPattern = Pattern.compile("(?m)^(SELECT)\\s\\*\\s(FROM)\\s[\\w]+;$");
+		}		
 	}
 	
-	/*
-	 * Try parser Insert Into.
-	 */
 	public void splitInsertInto () {
 		Pattern myPattern = Pattern.compile("(?m)^(INSERT)\\s(INTO)\\s[\\w]+\\s\\([\\w]+(,\\s[\\w]+)+?\\)\\s(VALUES)\\s\\('[\\w\\s]+'(,\\s'[\\w\\s]+')+?\\s\\);$");
 		if (!lines.isEmpty()){
@@ -117,7 +103,26 @@ public class queryParser {
 		}		
 	}
 	
+	public void splitSelect(){
+		
+	}
+	
+	/**
+	 * @return the table
+	 */
+	public String getTable() {
+		return table;
+	}
+
+	/**
+	 * @param table the table to set
+	 */
+	public void setTable(String table) {
+		this.table = table;
+	}
+
 	private Vector <Pair <String, Integer>> atributes;
+	private Vector <Pair <String, String>> atriRecord;
 	private String table;
 	private Vector <String> lines;
 }
