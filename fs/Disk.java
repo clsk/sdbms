@@ -2,21 +2,27 @@ package fs;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.BitSet;
 
 public class Disk
 {
     private static String OS = System.getProperty("os.name").toLowerCase();
-    private static String PATH_SEPARATOR = OS.indexOf("win") >= 0 ? "\\" : "/";
-	private static String ROOT = OS.indexOf("win") >= 0 ? "c:\\DB\\"  : "DB/";
+    private static String PATH_SEPARATOR = OS.contains("win") ? "\\" : "/";
+	private static String ROOT = OS.contains("win") ? "c:\\DB\\"  : "DB/";
 
     public static Page readPage(Schema schema, int pageId)
     {
+        if (pageId == Page.NULL_ID)
+            return null;
+
         String dirPath = ROOT + PATH_SEPARATOR +  schema.getSchemaName();
     	File dir = new File(dirPath);
     	dir.mkdirs(); //Verifica si existe el directorio, sino lo crea
@@ -53,12 +59,16 @@ public class Disk
         return null;
     }
 
-    public static void writePage(Page page)
+    public static Boolean writePage(Page page)
     {
-        ByteBuffer buffer = ByteBuffer.allocate(page.SIZE);
+        // Don't do anything if page is null
+        if (page == null)
+            return false;
+
+        ByteBuffer buffer = ByteBuffer.allocate(Page.SIZE);
         // Write records
-        BitSet slotMap = page.getSlotMap();
-        Schema schema = page.getSchema();
+        final BitSet slotMap = page.getSlotMap();
+        final Schema schema = page.getSchema();
         String[] records = page.getRecords();
         for (String record : records)
         {
@@ -88,15 +98,72 @@ public class Disk
 	    		file.createNewFile();
 
                 FileChannel channel = new FileOutputStream(file, false).getChannel();
-
                 buffer.rewind();
+                channel.write(buffer, 0);
                 channel.close();
 
 		} catch (Exception e) {
 			System.out.println("Ha ocurrido un error en el metodo writePage: " + e.getMessage());
             e.printStackTrace();
 		}
+
+        return true;
     }
+
+    static public Boolean writeHead(Schema schema, Head head)
+    {
+        if (schema == null | head == null)
+            return false;
+
+        String dirPath = ROOT + PATH_SEPARATOR +  schema.getSchemaName();
+    	File dir = new File(dirPath);
+    	dir.mkdirs(); //Verifica si existe el directorio, sino lo crea
+
+    	String filePath = dirPath + PATH_SEPARATOR + "head";
+    	File file = new File(filePath);
+    	try {
+	    	if(!file.exists()) //Verifica si existe el archivo, sino lo crea
+	    		file.createNewFile();
+
+            Files.write(file.toPath(), head.getData());
+
+        } catch (Exception e) {
+			System.out.println("Ha ocurrido un error en el metodo writeHead: " + e.getMessage());
+            e.printStackTrace();
+		}
+
+        return true;
+    }
+
+    static public Head readHead(Schema schema)
+    {
+
+        String dirPath = ROOT + PATH_SEPARATOR +  schema.getSchemaName();
+    	File dir = new File(dirPath);
+    	dir.mkdirs(); //Verifica si existe el directorio, sino lo crea
+
+    	String filePath = dirPath + PATH_SEPARATOR + "head";
+    	File file = new File(filePath);
+    	try {
+	    	if(!file.exists()) //Verifica si existe el archivo, sino lo crea
+                throw new Error("Error Opening File: File " + filePath + " does not exist");
+
+
+            final byte[] buffer = Files.readAllBytes(file.toPath());
+            return new Head(buffer);
+        } catch (Exception e) {
+			System.out.println("Ha ocurrido un error en el metodo readHead: " + e.getMessage());
+            e.printStackTrace();
+		}
+
+        return null;
+    }
+
+    static public void deleteTable(String schemaName) throws IOException {
+        String dirPath = ROOT + PATH_SEPARATOR +  schemaName;
+        Files.deleteIfExists(Paths.get(dirPath));
+    }
+
     private static byte[] toByteArray(BitSet bits, int len) {
         int n = len/8+1;
         byte[] bytes = new byte[len/8+1];
