@@ -14,6 +14,11 @@ public class Schema
         lastPageNum = _lastPageNum;
     }
 
+    public int getLastPageNum()
+    {
+        return lastPageNum;
+    }
+
     public int getNewPageNum()
     {
         return ++lastPageNum;

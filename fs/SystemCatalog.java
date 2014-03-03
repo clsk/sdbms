@@ -1,8 +1,9 @@
 package fs;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.HashMap;
+import java.util.Map.Entry;
+import java.util.Set;
 
 public class SystemCatalog {
 
@@ -17,12 +18,29 @@ public class SystemCatalog {
     {
         if (!heapFiles.containsKey(schema.getSchemaName()))
         {
+            // create table on disk
             Page p = new Page(schema, 0);
             Disk.writePage(p);
             Head h = new Head(0, Page.NULL_ID);
             Disk.writeHead(schema, h);
             HeapFile hf = new HeapFile(schema, p, null);
             heapFiles.put(schema.getSchemaName(), hf);
+
+            // Add to system catalog table
+            Record r = new Record(catalogHeap.getSchema());
+            r.setData("name", schema.getSchemaName());
+            r.setData("lastPageNum", "0");
+
+            catalogHeap.addRecord(r.toString());
+            for (Entry<String, FieldValue> entry : schema.getFields().entrySet())
+            {
+                r = new Record(catalogFieldsHeap.getSchema());
+                r.setData("schema", schema.getSchemaName());
+                r.setData("name", entry.getKey());
+                r.setData("pos", Integer.toString(entry.getValue().pos));
+                r.setData("size", Integer.toString(entry.getValue().size));
+                catalogFieldsHeap.addRecord(r.toString());
+            }
             return true;
         }
 
@@ -37,6 +55,7 @@ public class SystemCatalog {
     public void dropTable(String schemaName)
     {
         try {
+            // TODO: Remove table from system catalog tables
             Disk.deleteTable(schemaName);
         } catch (IOException e) {
             e.printStackTrace();
