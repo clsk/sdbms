@@ -1,6 +1,7 @@
 package fs;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -55,7 +56,31 @@ public class SystemCatalog {
     public void dropTable(String schemaName)
     {
         try {
-            // TODO: Remove table from system catalog tables
+
+            // Remove schema from SYSTEMCATALOG table
+            ArrayList<Pair<RID, String>> records =  catalogHeap.getAllRecords();
+            for (Pair<RID, String> record : records)
+            {
+                Record r = Record.valueOf(catalogHeap.getSchema(), record.getValue());
+                if (r.getValueForField("name").trim() == schemaName)
+                {
+                    catalogHeap.removeRecord(record.getKey());
+                    break;
+                }
+            }
+
+            // Remove schema fields from SYSTEMCATALOGFIELDS
+            records =  catalogFieldsHeap.getAllRecords();
+            for (Pair<RID, String> record : records)
+            {
+                Record r = Record.valueOf(catalogFieldsHeap.getSchema(), record.getValue());
+                if (r.getValueForField("schema").trim() == schemaName)
+                {
+                    catalogFieldsHeap.removeRecord(record.getKey());
+                }
+            }
+
+            // Delete table directory from Disk
             Disk.deleteTable(schemaName);
         } catch (IOException e) {
             e.printStackTrace();

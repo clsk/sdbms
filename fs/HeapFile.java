@@ -191,8 +191,8 @@ public class HeapFile
         return schema;
     }
 
-    Schema schema;
-    Head head;
-    Page free;
-    Page occupied;
+    private Schema schema;
+    private Head head;
+    private Page free;
+    private Page occupied;
 }
