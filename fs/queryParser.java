@@ -112,8 +112,21 @@ public class queryParser {
 		}		
 	}
 	
+	/**
+	 * Funcion para el analisis del Query "SELECT * FROM table_name"
+	 */
 	public void splitSelect(){
-		
+		Pattern myPattern = Pattern.compile("^(?m)^(SELECT)\\s\\*\\s(FROM)\\s[a-zA-Z]+;$");
+		if (!lines.isEmpty() && lines.size() == 1){
+			String line = lines.elementAt(0);
+			Matcher matching = myPattern.matcher(line);
+			if (matching.find()){
+				line = line.replaceAll("(SELECT)\\s\\*\\s(FROM)\\s", "");
+				line = line.replace(";", "");
+				line = line.toLowerCase();
+				setTable(line);
+			}
+		}
 	}
 	
 	/**
