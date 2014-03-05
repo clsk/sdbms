@@ -169,8 +169,6 @@ public class Disk
         int n = len/8+1;
         byte[] bytes = new byte[len/8+1];
         for (int i=0; i<bits.size(); i++) {
-            if (i == 8 && bits.get(8))
-                System.out.println("Printing bit 8");
             if (bits.get(i)) {
                 bytes[i/8] |= 1<<(i%8);
             }

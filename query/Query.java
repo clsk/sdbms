@@ -15,7 +15,6 @@ public class Query {
 
     public static void parse(String filename)
     {
-        System.out.println("Parsing...");
         try {
             BufferedReader reader = new BufferedReader (new FileReader(filename));
             Integer i = 0;
