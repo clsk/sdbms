@@ -31,13 +31,15 @@ public class Page
 
     public static int calcCapacity(int recordLength)
     {
-        int c = SIZE / recordLength;
-        int t = SIZE - c;
-        if (t > ((c+7)/8) + 8) {
-            c--;
+        int capacity = SIZE / recordLength;
+        int remainingSpace = SIZE - (capacity*recordLength);
+
+        while (remainingSpace < (capacity/8+1) + 8) {
+            capacity--;
+            remainingSpace += SIZE-(capacity*recordLength);
         }
 
-        return c;
+        return capacity;
     }
 
     public Page(Schema _schema, String[] _records, int _prevPage, int _nextPage, BitSet _slotMap)

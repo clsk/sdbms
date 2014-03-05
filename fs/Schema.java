@@ -35,7 +35,12 @@ public class Schema
     	else {
     		System.out.println("Este atributo ya existe en el Schema");
     	}
-    }  
+    }
+
+    public boolean hasField(String name)
+    {
+        return fields.containsKey(name);
+    }
  
     /*
      * Funcion para Agregar un atributo, indicando su nombre y Pair <Integer, Integer>

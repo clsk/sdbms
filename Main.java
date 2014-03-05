@@ -1,49 +1,30 @@
 import fs.*;
+import query.Create;
+import query.Query;
+
 import java.lang.System;
 import java.util.*;
 
 public class Main
 {
     public static void main(String[] args) {
-        bootstrapSchemas();
-        SystemCatalog sc = buildCatalog(getCatalogSchema(), getCatalogFieldsSchema());
-
-        System.out.println("1st record: " + sc.getTable("SYSTEMCATALOG").getRecord(new RID(0, 0)));
-    }
-
-    static Schema catalogSchema = null;
-
-    private static Schema getCatalogSchema()
-    {
-        if (catalogSchema == null)
+//        bootstrapSchemas();
+        if (args.length > 1)
         {
-            catalogSchema = new Schema("SYSTEMCATALOG", 0);
-            catalogSchema.addField("name", 0, 128);
-            catalogSchema.addField("lastPageNum", 1, 10);
+            if (args[1] == "--bootstrap")
+                bootstrapSchemas();
         }
 
-        return catalogSchema;
+        System.out.println("1st record: " + SystemCatalog.getInstance().getTable("SYSTEMCATALOG").getRecord(new RID(0, 0)));
+
+        Query.parse("sample.sql");
     }
 
-    static Schema catalogFieldsSchema = null;
 
-    private static Schema getCatalogFieldsSchema()
-    {
-        if (catalogFieldsSchema == null)
-        {
-            catalogFieldsSchema = new Schema("SYSTEMCATALOGFIELDS", 0);
-            catalogFieldsSchema.addField("schema", 0, 20);
-            catalogFieldsSchema.addField("name", 1, 32);
-            catalogFieldsSchema.addField("pos", 2, 3);
-            catalogFieldsSchema.addField("size", 3, 5);
-        }
-
-        return catalogFieldsSchema;
-    }
 
     static private Pair<Schema, Schema> bootstrapSchemas()
     {
-        Page page = new Page(getCatalogSchema(), 0);
+        Page page = new Page(SystemCatalog.getCatalogSchema(), 0);
 
         String name = Utilities.padRight("SYSTEMCATALOG", 128);
         String lastPageNum = Utilities.padRight("0", 10);
@@ -57,15 +38,15 @@ public class Main
         page.addRecord(record);
 
         Disk.writePage(page);
-        Disk.writeHead(getCatalogSchema(), new Head(0, -1));
+        Disk.writeHead(SystemCatalog.getCatalogSchema(), new Head(0, -1));
 
         // SYSTEMCATALOGFIELDS
-        Record catalogRecord = new Record(getCatalogFieldsSchema());
+        Record catalogRecord = new Record(SystemCatalog.getCatalogFieldsSchema());
         catalogRecord.setData("schema", "SYSTEMCATALOG");
         catalogRecord.setData("name", "name");
         catalogRecord.setData("pos", "0");
         catalogRecord.setData("size", "128");
-        Page p2 = new Page(getCatalogFieldsSchema(), 0);
+        Page p2 = new Page(SystemCatalog.getCatalogFieldsSchema(), 0);
         System.out.println(p2.addRecord(catalogRecord.toString()));
 
         catalogRecord.setData("schema", "SYSTEMCATALOG");
@@ -100,38 +81,10 @@ public class Main
         System.out.println(p2.addRecord(catalogRecord.toString()));
 
         Disk.writePage(p2);
-        Disk.writeHead(getCatalogFieldsSchema(), new Head(0, -1));
+        Disk.writeHead(SystemCatalog.getCatalogFieldsSchema(), new Head(0, -1));
 
-        return new Pair<Schema, Schema> (getCatalogSchema(), getCatalogFieldsSchema() );
+        return new Pair<Schema, Schema> (SystemCatalog.getCatalogSchema(), SystemCatalog.getCatalogFieldsSchema() );
     }
 
-    static private SystemCatalog buildCatalog(Schema catalogSchema, Schema catalogFieldsSchema)
-    {
-         // Read Catalog
-        HeapFile hpfCatalog = new HeapFile(catalogSchema);
-        ArrayList<Pair<RID, String>> records = hpfCatalog.getAllRecords();
-        HashMap<String, Schema> schemas = new HashMap<String, Schema>(records.size());
-        for (Pair<RID, String> record : records)
-        {
-            Record r = Record.valueOf(catalogSchema, record.getValue());
-            schemas.put(r.getValueForField("name").trim(), new Schema(r.getValueForField("name").trim(), Integer.parseInt(r.getValueForField("lastPageNum").trim())));
-        }
 
-        HeapFile hpfCatalogFields = new HeapFile(catalogFieldsSchema);
-        records = hpfCatalogFields.getAllRecords();
-        for (Pair<RID, String> record : records)
-        {
-            Record r = Record.valueOf(catalogFieldsSchema, record.getValue());
-            Schema schema = schemas.get(r.getValueForField("schema").trim());
-            schema.addField(r.getValueForField("name").trim(), Integer.parseInt(r.getValueForField("pos").trim()), Integer.parseInt(r.getValueForField("size").trim()));
-        }
-
-        HashMap<String, HeapFile> heapFiles = new HashMap<String, HeapFile>(schemas.size());
-        for (Schema schema : schemas.values())
-        {
-            heapFiles.put(schema.getSchemaName(), new HeapFile(schema));
-        }
-
-        return new SystemCatalog(heapFiles);
-    }
 }

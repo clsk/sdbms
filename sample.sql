@@ -1,0 +1,8 @@
+CREATE TABLE Test (
+C1 CHAR(10),
+C2 CHAR(5),
+C3 CHAR(23));
+
+INSERT INTO Test VALUES ('Test1', 'Test2', 'Test3');
+
+SELECT * FROM Test;

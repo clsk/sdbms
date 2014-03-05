@@ -13,9 +13,10 @@ public class HeapFile
         occupied = Disk.readPage(schema, head.getOccupied());
     }
 
-    public HeapFile(Schema _schema, Page _free, Page _occupied)
+    public HeapFile(Schema _schema, Head _head, Page _free, Page _occupied)
     {
         schema = _schema;
+        head = _head;
         setFree(_free);
         setOccupied(_occupied);
     }

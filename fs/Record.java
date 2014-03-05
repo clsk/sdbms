@@ -39,6 +39,11 @@ public class Record
         return pos != null ? data[pos] : null;
     }
 
+    public String[] getData()
+    {
+        return data;
+    }
+
     @Override
     public String toString()
     {
