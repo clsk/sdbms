@@ -162,7 +162,17 @@ public class Disk
 
     static public void deleteTable(String schemaName) throws IOException {
         String dirPath = ROOT + PATH_SEPARATOR +  schemaName;
-        Files.deleteIfExists(Paths.get(dirPath));
+        File dir = new File(dirPath);
+        if (dir.exists())
+        {
+            String[] fileList = dir.list();
+            for (String file : fileList)
+            {
+                File f = new File(dir, file);
+                f.delete();
+            }
+            dir.delete();
+        }
     }
 
     private static byte[] toByteArray(BitSet bits, int len) {

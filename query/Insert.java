@@ -42,6 +42,7 @@ public class Insert extends Query {
         if (hf == null)
         {
             System.out.println("Insert Error: Table " + m.group(1) + " does not exist!");
+            return null;
         }
 
         String[] columns = null;

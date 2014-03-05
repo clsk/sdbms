@@ -64,38 +64,46 @@ public class SystemCatalog {
         return heapFiles.get(schemaName);
     }
 
-    public void dropTable(String schemaName)
+    public boolean dropTable(String schemaName)
     {
-        try {
-
-            // Remove schema from SYSTEMCATALOG table
-            ArrayList<Pair<RID, String>> records =  catalogHeap.getAllRecords();
-            for (Pair<RID, String> record : records)
-            {
-                Record r = Record.valueOf(catalogHeap.getSchema(), record.getValue());
-                if (r.getValueForField("name").trim() == schemaName)
+        if (heapFiles.containsKey(schemaName))
+        {
+            try {
+                // Remove schema from SYSTEMCATALOG table
+                ArrayList<Pair<RID, String>> records =  catalogHeap.getAllRecords();
+                for (Pair<RID, String> record : records)
                 {
-                    catalogHeap.removeRecord(record.getKey());
-                    break;
+                    Record r = Record.valueOf(catalogHeap.getSchema(), record.getValue());
+                    if (r.getValueForField("name").trim().equals(schemaName))
+                    {
+                        catalogHeap.removeRecord(record.getKey());
+                        break;
+                    }
                 }
-            }
 
-            // Remove schema fields from SYSTEMCATALOGFIELDS
-            records =  catalogFieldsHeap.getAllRecords();
-            for (Pair<RID, String> record : records)
-            {
-                Record r = Record.valueOf(catalogFieldsHeap.getSchema(), record.getValue());
-                if (r.getValueForField("schema").trim() == schemaName)
+                // Remove schema fields from SYSTEMCATALOGFIELDS
+                records =  catalogFieldsHeap.getAllRecords();
+                for (Pair<RID, String> record : records)
                 {
-                    catalogFieldsHeap.removeRecord(record.getKey());
+                    Record r = Record.valueOf(catalogFieldsHeap.getSchema(), record.getValue());
+                    if (r.getValueForField("schema").trim().equals(schemaName))
+                    {
+                        catalogFieldsHeap.removeRecord(record.getKey());
+                    }
                 }
-            }
 
-            // Delete table directory from Disk
-            Disk.deleteTable(schemaName);
-        } catch (IOException e) {
-            e.printStackTrace();
+                // Delete table directory from Disk
+                Disk.deleteTable(schemaName);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return true;
         }
+        else
+        {
+            return false;
+        }
+
     }
 
     private static Schema catalogSchema = null;
