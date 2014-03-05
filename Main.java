@@ -8,16 +8,41 @@ import java.util.*;
 public class Main
 {
     public static void main(String[] args) {
-//        bootstrapSchemas();
-        if (args.length > 1)
+        if (args.length > 0)
         {
-            if (args[1] == "--bootstrap")
+            if (args[0].equals("--bootstrap"))
                 bootstrapSchemas();
         }
 
-        System.out.println("1st record: " + SystemCatalog.getInstance().getTable("SYSTEMCATALOG").getRecord(new RID(0, 0)));
+        String scriptName = null;
+        for (int i = 0; i < args.length; i++)
+        {
+            if (args[i].equals("-f"))
+            {
+                if (args.length > i+1)
+                {
+                    scriptName = args[++i];
+                    continue;
+                }
+                else
+                {
+                    System.out.println("Error parsing arguments: input file not specified");
+                    return;
+                }
+            }
+            if (args[i].equals("--bootstrap"))
+            {
+                System.out.print("Bootstraping System Catalog...");
+                bootstrapSchemas();
+                System.out.println("done");
+            }
+        }
 
-        Query.parse("sample.sql");
+        if (scriptName != null)
+        {
+            System.out.println("Parsing script file " + scriptName + "...");
+            Query.parse(scriptName);
+        }
     }
 
 
@@ -47,38 +72,38 @@ public class Main
         catalogRecord.setData("pos", "0");
         catalogRecord.setData("size", "128");
         Page p2 = new Page(SystemCatalog.getCatalogFieldsSchema(), 0);
-        System.out.println(p2.addRecord(catalogRecord.toString()));
+        p2.addRecord(catalogRecord.toString());
 
         catalogRecord.setData("schema", "SYSTEMCATALOG");
         catalogRecord.setData("name", "lastPageNum");
         catalogRecord.setData("pos", "1");
         catalogRecord.setData("size", "10");
-        System.out.println(p2.addRecord(catalogRecord.toString()));
+        p2.addRecord(catalogRecord.toString());
 
         catalogRecord.setData("schema", "SYSTEMCATALOGFIELDS");
         catalogRecord.setData("name", "schema");
         catalogRecord.setData("pos", "0");
         catalogRecord.setData("size", "20");
-        System.out.println(p2.addRecord(catalogRecord.toString()));
+        p2.addRecord(catalogRecord.toString());
 
         catalogRecord.setData("schema", "SYSTEMCATALOGFIELDS");
         catalogRecord.setData("name", "name");
         catalogRecord.setData("pos", "1");
         catalogRecord.setData("size", "32");
-        System.out.println(p2.addRecord(catalogRecord.toString()));
+        p2.addRecord(catalogRecord.toString());
 
 
         catalogRecord.setData("schema", "SYSTEMCATALOGFIELDS");
         catalogRecord.setData("name", "pos");
         catalogRecord.setData("pos", "2");
         catalogRecord.setData("size", "3");
-        System.out.println(p2.addRecord(catalogRecord.toString()));
+        p2.addRecord(catalogRecord.toString());
 
         catalogRecord.setData("schema", "SYSTEMCATALOGFIELDS");
         catalogRecord.setData("name", "size");
         catalogRecord.setData("pos", "3");
         catalogRecord.setData("size", "5");
-        System.out.println(p2.addRecord(catalogRecord.toString()));
+        p2.addRecord(catalogRecord.toString());
 
         Disk.writePage(p2);
         Disk.writeHead(SystemCatalog.getCatalogFieldsSchema(), new Head(0, -1));

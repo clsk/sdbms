@@ -34,7 +34,6 @@ public class Insert extends Query {
         Matcher m = T_PATTERN.matcher(line);
         if (!m.matches())
         {
-            System.out.println(line);
             System.out.println("Error matching INSERT statement");
             return null;
         }

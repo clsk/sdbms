@@ -7,8 +7,6 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import miniDBMS.Pair;
-
 public class queryParser {
 	/**
 	 * Vector que almacena los comandos del tipo Create Table.
@@ -50,21 +48,21 @@ public class queryParser {
 			BufferedReader reader = new BufferedReader (new FileReader(pathQuery));
 			/**
 			 * Patron de Expresion Regular.
-			 * Este realiza la verificación de si
+			 * Este realiza la verificaciï¿½n de si
 			 * es un commando CREATE TABLE.
 			 */
 			Pattern patCreateTable = Pattern.compile("(?m)^(create table|CREATE TABLE)\\s[\\w]+\\s\\(");
 			
 			/**
 			 * Patron de Expresion Regular.
-			 * Este realiza la verificación de si
+			 * Este realiza la verificaciï¿½n de si
 			 * es un commando NAME CHAR SIZE
 			 */
 			Pattern patAttribute = Pattern.compile("(?m)^[\\w]+\\s(char|CHAR)\\s[\\d]+(,|\\);)$");
 			
 			/**
 			 * Patron de Expresion Regular.
-			 * Este realiza la verificación de si
+			 * Este realiza la verificaciï¿½n de si
 			 * es un commando INSERT INTO.
 			 */
 			Pattern patInsertInto = Pattern.compile("(?m)^(INSERT)\\s(INTO)\\s[\\w]+\\s\\([\\w]+(,\\s[\\w]+)+?\\)"
@@ -72,7 +70,7 @@ public class queryParser {
 			
 			/**
 			 * Patron de Expresion Regular.
-			 * Este realiza la verificación de si
+			 * Este realiza la verificaciï¿½n de si
 			 * es un commando SELECT * FROM.
 			 */
 			Pattern patSelect = Pattern.compile("^(?m)^(SELECT)\\s\\*\\s(FROM)\\s[a-zA-Z]+;$");
@@ -99,7 +97,7 @@ public class queryParser {
 							commandsInsertInto = new Vector <Pair <Integer, String>> ();
 						}
 						Pair <Integer, String> auxP = new Pair <Integer, String> (sequence, line);
-						commandsInsertInto.add(auxPII);
+						commandsInsertInto.add(auxP);
 					}
 					if (patSelect.matcher(line).find()) {
 						sequence++;
@@ -107,7 +105,7 @@ public class queryParser {
 							commandsSelect = new Vector <Pair <Integer, String>> ();
 						}
 						Pair <Integer, String> auxP = new Pair <Integer, String> (sequence, line);
-						commandsSelect.add(auxPII);
+						commandsSelect.add(auxP);
 					}
 					if (!patSelect.matcher(line).find() && !patInsertInto.matcher(line).find() 
 							&& !patCreateTable.matcher(line).find() && !patAttribute.matcher(line).find()){
