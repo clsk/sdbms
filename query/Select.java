@@ -100,7 +100,7 @@ public class Select extends Query {
         	hf = SystemCatalog.getInstance().getTable(m.group(1));
         	
         	if (hf == null) {      	
-        		System.out.println("Select Error: Table " + m.group(1) + " does not exist!");
+        		System.out.println("Select Error Table " + m.group(1).toUpperCase() + " does not exist!");
         		return null;
         	}
         	
@@ -113,7 +113,7 @@ public class Select extends Query {
         	hf = SystemCatalog.getInstance().getTable(n.group(3));
         	        	
         	if (hf == null){       	
-        		System.out.println("Select Error: Table " + m.group(1) + " does not exist!");
+        		System.out.println("Select Error: Table " + m.group(1).toUpperCase() + " does not exist!");
         		return null;
         	}
         	

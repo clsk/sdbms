@@ -38,7 +38,7 @@ public class Main
 
         if (scriptName != null)
         {
-            System.out.println("Parsing script file " + scriptName + "...");
+            System.out.println("Parsing script file " + scriptName + "...\n");
             Query.parse(scriptName);
         }
         

@@ -28,12 +28,12 @@ public class Query {
                     Insert.parseInsert(line, reader).execute();
                 else if (line.toLowerCase().startsWith("select"))
                     Select.parseSelect(line, reader).execute();
-                // else if (line.toLowerCase().startsWith("drop table"))
-                //     Drop.parseDrop(line, reader).execute();
+                else if (line.toLowerCase().startsWith("drop table"))
+                     Drop.parserDrop(line, reader).execute();
             }
         } catch (Exception ex)
         {
-            System.out.println(ex.getMessage());
+            System.out.println( "Received Value: "+ ex.getMessage());
         }
     }
 
