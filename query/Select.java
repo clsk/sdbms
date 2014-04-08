@@ -21,65 +21,38 @@ public class Select extends Query {
     @Override
     public void execute()
     {
-        System.out.print("RID");
+        System.out.println("\nSELECT statement on table => " + hf.getSchema().getSchemaName().toUpperCase() + ".");
+        System.out.println("Virtual Table Generated.\n");
+    	
+    	System.out.print("RID");
         int len = 0;
         int i = 0;
         
-        if (filters != null) {
-        	
-        	for (int j = 0; j < filters.length; j++){
-        		System.out.print(" | " + Utilities.padRight(filters[j], hf.getSchema().getFieldPair(filters[j]).size));
-                len += hf.getSchema().getFieldPair(filters[j]).size;
-                i++;
-        	}
-        	
-        	System.out.println(" |");
-            char[] array = new char[(i*3) + len + 5];
-            Arrays.fill(array, '-');
-            System.out.println(new String(array));
-            
-            // Print Records
-            ArrayList<Pair<RID, String>> records =  hf.getAllRecords();
-            for (Pair<RID, String> record : records)
-            {
-                Record r = Record.valueOf(hf.getSchema(), record.getValue());
-                System.out.print(record.getKey());
-                /*
-                 * TODO: Presentar los records dependiendo de la columna.
-                 */
-                for (String column : r.getData())
-                {
-                    System.out.print(" | " + column);
-                }
-                System.out.println(" |");
+    	for (int j = 0; j < filters.length; j++){
+    		System.out.print(" | " + Utilities.padRight(filters[j], hf.getSchema().getFieldPair(filters[j]).size));
+            len += hf.getSchema().getFieldPair(filters[j]).size;
+            i++;
+    	}    	
+    	System.out.println(" |");
+    	
+    	//	Separador de Header
+        char[] array = new char[(i*3) + len + 5];
+        Arrays.fill(array, '-');
+        System.out.println(new String(array));
+        
+        // Print Records
+        ArrayList<Pair<RID, String>> records =  hf.getAllRecords();
+        for (Pair<RID, String> record : records)
+        {
+            Record r = Record.valueOf(hf.getSchema(), record.getValue());
+            System.out.print(record.getKey());
+            String [] data = r.getData();
+            for (int j = 0; j < filters.length; j++){
+            	//	Printing record by schema field position
+            	System.out.print(" | " + data[hf.getSchema().getFieldPos(filters[j])]);
             }
-        }
-        else {
-        	// Print header
-            for (Entry<String, FieldValue> column : hf.getSchema().getSortedFields())
-            {
-                System.out.print(" | " + Utilities.padRight(column.getKey(), column.getValue().size));
-                len += column.getValue().size;
-                i++;
-            }
-            
+            data = null;
             System.out.println(" |");
-            char[] array = new char[(i*3) + len + 5];
-            Arrays.fill(array, '-');
-            System.out.println(new String(array));
-
-            // Print Records
-            ArrayList<Pair<RID, String>> records =  hf.getAllRecords();
-            for (Pair<RID, String> record : records)
-            {
-                Record r = Record.valueOf(hf.getSchema(), record.getValue());
-                System.out.print(record.getKey());
-                for (String column : r.getData())
-                {
-                    System.out.print(" | " + column);
-                }
-                System.out.println(" |");
-            }        	
         }
     }
     
@@ -113,6 +86,8 @@ public class Select extends Query {
 
         Matcher m = SELECT_PATTERN.matcher (line);
         Matcher n = SELECT_SPECIFIC_COLUMNS.matcher(line);
+        String filters = "";
+        HeapFile hf= null;
         
         if (!m.matches() && !n.matches())
         {
@@ -122,42 +97,48 @@ public class Select extends Query {
         }
 
         if (m.matches()) {
-        	HeapFile hf = SystemCatalog.getInstance().getTable(m.group(1));
-        	if (hf == null)       	
+        	hf = SystemCatalog.getInstance().getTable(m.group(1));
+        	
+        	if (hf == null) {      	
         		System.out.println("Select Error: Table " + m.group(1) + " does not exist!");
-        	return new Select(hf);
+        		return null;
+        	}
+        	
+        	for (Entry<String, FieldValue> column : hf.getSchema().getSortedFields()){
+        		filters += column.getKey().toString() + " ";
+        	}       	
         }
         
         if (n.matches()) {
-        	HeapFile hf = SystemCatalog.getInstance().getTable(n.group(3));
+        	hf = SystemCatalog.getInstance().getTable(n.group(3));
         	        	
-        	if (hf == null)       	
+        	if (hf == null){       	
         		System.out.println("Select Error: Table " + m.group(1) + " does not exist!");
+        		return null;
+        	}
         	
         	/*
         	 *	Limpieza de atributos
         	 *	Las siguientes lineas eliminan del SELECT
         	 *	la parte inicial 'select' y la parte final 'from'
         	 */
-        	String filters = line.replaceAll("(^select\\s+)", "");
+        	filters = line.replaceAll("(^select\\s+)", "");
         	filters = filters.replaceAll("\\s+from.*", "");
-        	filters = filters.replaceAll(",|\\s+", " ");
-        	
-        	/*
-        	 * Declaracion de HeapFile
-        	 */
-        	Select _nuevo = new Select(hf);
-        	
-        	//	Lista de atributos llevada a minusculas.
-        	_nuevo.SetFilters(filters.toLowerCase());
-        	
-        	if (_nuevo.CheckFields()){
-        		return _nuevo;
-        	}
-        	else
-        		return null;
+        	filters = filters.replaceAll(",|\\s+", " ");        	
         }
         
-        return new Select(null);
+        /*
+    	 * Declaracion de Select (HeapFile)
+    	 */
+    	Select _nuevo = new Select(hf);
+    	
+    	//	Lista de atributos llevada a minusculas.
+    	_nuevo.SetFilters(filters.toLowerCase());
+    	
+    	if (_nuevo.CheckFields()){
+    		return _nuevo;
+    	}
+    	else
+    		return null;
     }
 }

@@ -41,6 +41,8 @@ public class Main
             System.out.println("Parsing script file " + scriptName + "...");
             Query.parse(scriptName);
         }
+        
+        System.exit(0);
     }
 
 
