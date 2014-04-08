@@ -1,7 +1,5 @@
 package fs;
 
-import java.lang.Number;
-
 public class FieldValue implements Comparable<FieldValue> {
 	public int pos;
 	public int size;

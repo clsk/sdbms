@@ -7,8 +7,6 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.BitSet;
 
@@ -68,9 +66,7 @@ public class Disk
         ByteBuffer buffer = ByteBuffer.allocate(Page.SIZE);
         // Write records
         final BitSet slotMap = page.getSlotMap();
-        final Schema schema = page.getSchema();
         String[] records = page.getRecords();
-        int s = records.length;
         for (String record : records)
         {
             try {
@@ -176,7 +172,6 @@ public class Disk
     }
 
     private static byte[] toByteArray(BitSet bits, int len) {
-        int n = len/8+1;
         byte[] bytes = new byte[len/8+1];
         for (int i=0; i<bits.size(); i++) {
             if (bits.get(i)) {
