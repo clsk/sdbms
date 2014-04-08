@@ -54,7 +54,7 @@ public class Insert extends Query {
             // Check if schema has this field
             for (String column : columns)
             {
-                if (!hf.getSchema().hasField(column))
+                if (!hf.getSchema().hasField(column.replaceAll("\\s+", "")))
                 {
                      System.out.println("Insert Error: Schema " + hf.getSchema().getSchemaName() + " does not have a column named " + column + ".");
                     return null;
@@ -92,7 +92,7 @@ public class Insert extends Query {
 
             for (int i = 0; i < columns.length; i++)
             {
-                r.setData(columns[i], values.get(i));
+                r.setData(columns[i].replaceAll("\\s+", ""), values.get(i));
             }
         }
         else
