@@ -23,14 +23,19 @@ public class Record
         for (Pair<String, String> field : fields)
         {
             FieldValue fv = schema.getFieldPair(field.getKey());
-            data[fv.pos] = Utilities.padRight(field.getValue(), fv.size);
+            setData(fv, field.getValue());
         }
     }
 
     public void setData(String field, String value)
     {
         FieldValue fv = schema.getFieldPair(field);
-        data[fv.pos] = Utilities.padRight(value, fv.size);
+        setData(fv, value);
+    }
+
+    public void setData(FieldValue fv, String value)
+    {
+       data[fv.pos] = Utilities.padRight(value, fv.size);
     }
 
     public String getValueForField(String field)

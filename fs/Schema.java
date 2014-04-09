@@ -56,6 +56,18 @@ public class Schema
     		System.out.println("Este atributo ya existe en el Schema");
     	}
     }
+
+    public void addField(String _name, Integer _size)
+    {
+     	if (!fields.containsKey(_name.toLowerCase())){
+        	fields.put(_name.toLowerCase(), new FieldValue(getFieldCount()-1, _size));
+        	increaseRecordLength(_size);
+    	}
+    	else {
+    		System.out.println("Este atributo ya existe en el Schema");
+    	}
+
+    }
     
     /*
      * Funcion de Retorno del Nombre del Schema.
@@ -80,6 +92,42 @@ public class Schema
      */
     public FieldValue getFieldPair (String _name){
     	return fields.get(_name.toLowerCase());
+    }
+
+    // Returns false if field doesn't exist
+    public boolean resizeField(String _name, Integer newSize)
+    {
+
+        FieldValue fv = fields.get(_name.toLowerCase());
+        if (fv != null)
+        {
+            increaseRecordLength(newSize-fv.size);
+            fv.size = newSize;
+            return true;
+        }
+
+        return false;
+    }
+
+    public boolean removeField(String _name)
+    {
+        List<Entry<String, FieldValue>> sortedFields = getSortedFields();
+        boolean found = false;
+        for (Entry<String, FieldValue> field : sortedFields)
+        {
+            if (!found)
+            {
+                if (field.getKey().equals(_name.toLowerCase()))
+                    found = true;
+            }
+            else
+            {
+                fields.get(field.getKey()).pos--;
+            }
+
+        }
+
+        return found;
     }
     
     /*
@@ -129,6 +177,14 @@ public class Schema
     public int getFieldCount()
     {
         return fields.size();
+    }
+
+    Schema(Schema rhs)
+    {
+        fields = (HashMap <String, FieldValue>)rhs.fields.clone();
+        name = rhs.name;
+        recordLength = rhs.recordLength;
+        lastPageNum = 0;
     }
     
 	private HashMap <String, FieldValue> fields;

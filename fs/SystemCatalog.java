@@ -135,6 +135,111 @@ public class SystemCatalog {
         return catalogFieldsSchema;
     }
 
+    public boolean addColumn(String table, String name, Integer length)
+    {
+        // Check if column doesn't exist
+        HeapFile hf = getTable(table);
+        Schema oldSchema = hf.getSchema();
+        if (hf == null)
+            return false;
+        if (oldSchema.hasField(name))
+            return false;
+        // Get all records
+        ArrayList<Pair<RID, String>> records = hf.getAllRecords();
+        // Drop table
+        dropTable(table);
+        // Create new schema
+        Schema newSchema = new Schema(oldSchema);
+        newSchema.addField(name, length);
+        // Recreate table
+        createTable(newSchema);
+        // Reinsert records
+        for (Pair<RID, String> record : records)
+        {
+            Record oldRecord = Record.valueOf(oldSchema, record.getValue());
+            Record newRecord = new Record(newSchema);
+            for (Entry<String, FieldValue> entry : oldSchema.getFields().entrySet())
+            {
+                newRecord.setData(entry.getValue(), oldRecord.getData()[entry.getValue().pos]);
+            }
+            newRecord.setData(name, "");
+        }
+
+        return true;
+    }
+
+    public boolean resizeColumn(String table, String name, Integer length)
+    {
+          // Check if column doesn't exist
+        HeapFile hf = getTable(table);
+        Schema oldSchema = hf.getSchema();
+        if (hf == null)
+            return false;
+        if (oldSchema.hasField(name))
+            return false;
+        // Get all records
+        ArrayList<Pair<RID, String>> records = hf.getAllRecords();
+        // Drop table
+        dropTable(table);
+        // Create new schema
+        Schema newSchema = new Schema(oldSchema);
+        newSchema.addField(name, length);
+        // Recreate table
+        createTable(newSchema);
+        // Reinsert records
+        for (Pair<RID, String> record : records)
+        {
+            Record oldRecord = Record.valueOf(oldSchema, record.getValue());
+            Record newRecord = new Record(newSchema);
+            for (Entry<String, FieldValue> entry : oldSchema.getFields().entrySet())
+            {
+                if (entry.getKey().equals(name.toLowerCase()))
+                    newRecord.setData(entry.getValue(), oldRecord.getData()[entry.getValue().pos].substring(0, length < entry.getValue().size ? length : entry.getValue().size));
+                else
+                    newRecord.setData(entry.getValue(), oldRecord.getData()[entry.getValue().pos]);
+            }
+
+        }
+
+        return true;
+    }
+
+     public boolean removeColumn(String table, String name)
+    {
+          // Check if column doesn't exist
+        HeapFile hf = getTable(table);
+        Schema oldSchema = hf.getSchema();
+        if (hf == null)
+            return false;
+        if (oldSchema.hasField(name))
+            return false;
+        // Get all records
+        ArrayList<Pair<RID, String>> records = hf.getAllRecords();
+        // Drop table
+        dropTable(table);
+        // Create new schema
+        Schema newSchema = new Schema(oldSchema);
+        newSchema.removeField(name);
+        // Recreate table
+        createTable(newSchema);
+        // Reinsert records
+        for (Pair<RID, String> record : records)
+        {
+            Record oldRecord = Record.valueOf(oldSchema, record.getValue());
+            Record newRecord = new Record(newSchema);
+            for (Entry<String, FieldValue> entry : oldSchema.getFields().entrySet())
+            {
+                if (entry.getKey().equals(name.toLowerCase()))
+                    continue;
+                else
+                    newRecord.setData(entry.getValue(), oldRecord.getData()[entry.getValue().pos]);
+            }
+
+        }
+
+        return true;
+    }
+
     static private SystemCatalog buildCatalog(Schema catalogSchema, Schema catalogFieldsSchema)
     {
          // Read Catalog

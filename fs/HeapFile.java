@@ -175,6 +175,41 @@ public class HeapFile
         return records;
     }
 
+    // Overload with default true value
+    public ArrayList<Pair<RID, Record>> getRecordsWithEquality(Page page, String column, String value)
+    {
+        return getRecordsWithEquality(page, column, value, true);
+
+    }
+
+    public ArrayList<Pair<RID, Record>> getRecordsWithInequality(Page page, String column, String value)
+    {
+        return getRecordsWithEquality(page, column, value, false);
+
+    }
+
+    public ArrayList<Pair<RID, Record>> getRecordsWithEquality(Page page, String column, String value, boolean equality)
+    {
+        ArrayList<Pair<RID, Record>> records = new ArrayList<Pair<RID, Record>>(page.getSlotCount());
+        BitSet bs = page.getSlotMap();
+        for (int i = bs.nextSetBit(0); i >= 0; i = bs.nextSetBit(i+1))
+        {
+            Record r = Record.valueOf(this.schema ,page.getRecord(i));
+            if (r.getValueForField(column).equals(value) == equality)
+                records.add(new Pair<RID, Record>(new RID(page.getID(), i), r));
+        }
+
+        if (page.getNextPage() != Page.NULL_ID)
+        {
+            int nextPageId = page.getNextPage();
+            page = null; // Set page to null so stack doesn't get too big
+            Page nextPage = Disk.readPage(schema, nextPageId);
+            records.addAll(getRecordsWithEquality(nextPage, column, value, equality));
+        }
+
+        return records;
+    }
+
     private void setFree(Page page)
     {
         free = page;
