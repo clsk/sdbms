@@ -56,7 +56,7 @@ public class Insert extends Query {
             {
                 if (!hf.getSchema().hasField(column.replaceAll("\\s+", "")))
                 {
-                     System.out.println("Insert Error: Schema " + hf.getSchema().getSchemaName() + " does not have a column named " + column + ".");
+                    System.out.println("Insert Error: Schema " + hf.getSchema().getSchemaName() + " does not have a column named " + column + ".");
                     return null;
                 }
             }

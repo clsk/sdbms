@@ -191,6 +191,10 @@ public class HeapFile
     {
         return schema;
     }
+    
+    public void addNewField (String _colName, int _colSize){
+    	schema.addField(_colName, schema.getFieldCount() + 1, _colSize);
+    }
 
     private Schema schema;
     private Head head;

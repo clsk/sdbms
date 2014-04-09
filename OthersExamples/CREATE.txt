@@ -1,0 +1,4 @@
+CREATE TABLE producto (
+pid CHAR (10),
+pnombre CHAR (25),
+pcosto CHAR (15));

@@ -27,12 +27,12 @@ public class Record
         }
     }
 
-    public void setData(String field, String value)
+    public void setData (String field, String value)
     {
         FieldValue fv = schema.getFieldPair(field);
         data[fv.pos] = Utilities.padRight(value, fv.size);
     }
-
+    
     public String getValueForField(String field)
     {
         Integer pos = schema.getFieldPos(field);
@@ -73,5 +73,9 @@ public class Record
         
     private String[] data;
     private Schema schema;
+    
+	public void setData (String[] _newData) {
+		data = _newData;
+	}
 
 }
