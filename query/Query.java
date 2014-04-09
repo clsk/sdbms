@@ -30,6 +30,8 @@ public class Query {
                     Select.parseSelect(line, reader).execute();
                 else if (line.toLowerCase().startsWith("drop table"))
                      Drop.parserDrop(line, reader).execute();
+                else if (line.toLowerCase().startsWith("alter table"))
+                	Alter.parserAlter(line).execute();
             }
         } catch (Exception ex)
         {
