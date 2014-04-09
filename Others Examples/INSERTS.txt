@@ -1,6 +1,0 @@
-insert into producto (pid , pnombre , pcosto ) values ('002','lapiz','5.00')
-insert into producto (pid , pnombre , pcosto ) values ('003','borrador','15.00')
-insert into producto (pid , pnombre , pcosto ) values ('004','lapicero','20.00')
-insert into producto (pid , pnombre , pcosto ) values ('005','cuaderno','40.00')
-insert into producto (pid , pnombre , pcosto ) values ('006','sacapuntas','10.00')
-insert into producto (pid , pnombre , pcosto ) values ('007','juego de reglas','120.00')

@@ -44,18 +44,18 @@ public class Alter extends Query {
 			
 			//	Get all records of actual table.
 			ArrayList<Pair<RID, String>> records =  hf.getAllRecords();
-						
+			
 			//	Adding the new column to the actual table.
 			hf.addNewField(column, columnSize);
 			SystemCatalog.getInstance().addColumn(hf.getSchema(), column, columnSize);
-						
+								
 			//	Eliminacion de la tabla actual.
 			SystemCatalog.getInstance().dropTable(table);
 			for (int j = 0; j < records.size(); j++){
 				RID aux = records.get(j).getKey();
 				hf.removeRecord(aux);
 			}
-			
+						
 			char [] _emptyValue = new char [columnSize];
 			Arrays.fill(_emptyValue, '0');
 			
@@ -73,7 +73,7 @@ public class Alter extends Query {
 				data [hf.getSchema().getFieldPos(column) - 1] = new String (_emptyValue);
 				
 				/*
-				 *	Solo carga las dos primeras paginas.
+				 *	Solo carga las dos primeras records.
 				 *	Luego... Catch a exception.
 				 */
 				rAux.setData(data);
@@ -84,7 +84,14 @@ public class Alter extends Query {
 			if (SystemCatalog.getInstance().createTable(hf.getSchema())) {
 				System.out.println("Column: " + column.toUpperCase() + " was added in Table: " + table.toUpperCase() + ".");
 			}
-		}		
+		}
+		
+		if (operationType == 'D' ) {
+						
+		}
+		if (operationType == 'R') {
+			
+		}
 	}
 	
 	static final Pattern ALTER_DROP = Pattern.compile("alter\\s+table\\s+[\\w]+\\s+drop\\s+column\\s+[\\w]+;$", Pattern.CASE_INSENSITIVE);
