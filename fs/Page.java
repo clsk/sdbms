@@ -154,7 +154,17 @@ public class Page
     {
         this.id = id;
     }
-
+    
+    public void DestroyPage (){
+    	id = 0;
+    	schema = null;
+    	slots = null;
+    	capacity = 0;
+    	slotCount = 0;
+    	slotMap = null;
+    	prevPage = -1;
+    	nextPage = -1;
+    }
     // Private Members
     private int id;
     private Schema schema;

@@ -170,6 +170,15 @@ public class Disk
             dir.delete();
         }
     }
+    
+    static public boolean ExistsTable (String schemaName){
+    	String dirPath = ROOT + PATH_SEPARATOR +  schemaName;
+        File dir = new File(dirPath);
+        if (dir.exists()){
+        	return true;
+        }
+        return false;
+    }
 
     private static byte[] toByteArray(BitSet bits, int len) {
         byte[] bytes = new byte[len/8+1];

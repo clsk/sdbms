@@ -24,10 +24,10 @@ public class SystemCatalog {
         catalogHeap = heapFiles.get("SYSTEMCATALOG");
         catalogFieldsHeap = heapFiles.get("SYSTEMCATALOGFIELDS");
     }
-
+    
     public boolean createTable(Schema schema)
     {
-        if (!heapFiles.containsKey(schema.getSchemaName()))
+        if ( !heapFiles.containsKey(schema.getSchemaName()) || !Disk.ExistsTable(schema.getSchemaName()))
         {
             // create table on disk
             Head h = new Head(0, Page.NULL_ID);
@@ -41,8 +41,8 @@ public class SystemCatalog {
             Record r = new Record(catalogHeap.getSchema());
             r.setData("name", schema.getSchemaName());
             r.setData("lastPageNum", "0");
-
             catalogHeap.addRecord(r);
+            
             for (Entry<String, FieldValue> entry : schema.getFields().entrySet())
             {
                 r = new Record(catalogFieldsHeap.getSchema());
@@ -56,6 +56,15 @@ public class SystemCatalog {
         }
 
         return false;
+    }
+    
+    public void addColumn (Schema _table, String _name, int Size){
+    	Record r = new Record (catalogFieldsHeap.getSchema());
+    	r.setData("schema", _table.getSchemaName());
+    	r.setData("name", _name);
+    	r.setData("pos", Integer.toString(_table.getFieldCount()));
+    	r.setData("size", Integer.toString(Size));
+    	catalogFieldsHeap.addRecord(r);
     }
 
     public HeapFile getTable(String schemaName)
