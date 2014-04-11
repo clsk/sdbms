@@ -3,10 +3,6 @@
  */
 package query;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -38,10 +34,16 @@ public class Alter extends Query {
 		}
 		
 		if (operationType == 'D' ) {
-						
+			if (SystemCatalog.getInstance().removeColumn(table, column))
+                System.out.println("Successfully delete column " + column + " from " + table);
+            else
+                System.out.println("Error while attempting to delete column " + column);			
 		}
 		if (operationType == 'R') {
-			
+			if (SystemCatalog.getInstance().resizeColumn(table, column, columnSize))
+                System.out.println("Successfully delete column " + column + " from " + table);
+            else
+                System.out.println("Error while attempting to delete column " + column);
 		}
 	}
 	
@@ -120,8 +122,13 @@ public class Alter extends Query {
 			return null;
 		}
 		
-		if (hf.getSchema().hasField(ColumnName) && Op != 'R'){
+		if (!hf.getSchema().hasField(ColumnName) && (Op == 'D' || Op == 'R')){
 			System.out.println("The attribute " + ColumnName.toUpperCase() + " does not exist.");
+			return null;
+		}
+		
+		if (hf.getSchema().hasField(ColumnName) && Op == 'A'){
+			System.out.println("The attribute " + ColumnName.toUpperCase() + " already exist.");
 			return null;
 		}
 		

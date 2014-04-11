@@ -11,7 +11,7 @@ public class Record
         data = new String[_schema.getFieldCount()];
         schema = _schema;
     }
-
+    
     public Record(Schema _schema, String [] _data)
     {
         data = _data;

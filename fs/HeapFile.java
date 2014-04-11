@@ -161,7 +161,6 @@ public class HeapFile
         BitSet bs = page.getSlotMap();
         for (int i = bs.nextSetBit(0); i >= 0; i = bs.nextSetBit(i+1))
         {
-            System.out.println("Adding record");
             records.add(new Pair<RID, String>(new RID(page.getID(), i), page.getRecord(i)));
         }
 

@@ -64,7 +64,7 @@ public class Schema
     public void addField(String _name, Integer _size)
     {
      	if (!fields.containsKey(_name.toLowerCase())){
-        	fields.put(_name.toLowerCase(), new FieldValue(getFieldCount()-1, _size));
+        	fields.put(_name.toLowerCase(), new FieldValue(getFieldCount(), _size));
         	increaseRecordLength(_size);
     	}
     	else {
@@ -121,12 +121,14 @@ public class Schema
         {
             if (!found)
             {
-                if (field.getKey().equals(_name.toLowerCase()))
+                if (field.getKey().equals(_name.toLowerCase())){
+                	fields.remove(_name);
                     found = true;
+                }
             }
             else
             {
-                fields.get(field.getKey()).pos--;
+                fields.get(field.getKey()).pos--;               
             }
 
         }

@@ -2,6 +2,7 @@ package fs;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map.Entry;
 
@@ -141,23 +142,26 @@ public class SystemCatalog {
         // Check if column doesn't exist
         HeapFile hf = getTable(table);
         Schema oldSchema = hf.getSchema();
-        if (hf == null)
-        {
-            System.out.println(0);
-            return false;
-        }
+
         if (oldSchema.hasField(name))
         {
             System.out.println(1);
             return false;
         }
+        
         // Get all records
         ArrayList<Pair<RID, String>> records = hf.getAllRecords();
+        
+        //Destroying HeapFile on Memory
+        hf = null;
+        
         // Drop table
         dropTable(table);
+        
         // Create new schema
         Schema newSchema = new Schema(oldSchema);
         newSchema.addField(name, length);
+        
         // Recreate table
         if (createTable(newSchema) == false)
         {
@@ -166,6 +170,12 @@ public class SystemCatalog {
         }
 
         hf = getTable(table);
+        
+        //For fill the values for the new column
+        char [] _emptyValue = new char [length];
+        Arrays.fill( _emptyValue, '#');
+        String _newValue = new String (_emptyValue);
+        
         // Reinsert records
         for (Pair<RID, String> record : records)
         {
@@ -173,13 +183,15 @@ public class SystemCatalog {
             Record newRecord = new Record(newSchema);
             for (Entry<String, FieldValue> entry : oldSchema.getFields().entrySet())
             {
-                newRecord.setData(entry.getValue(), oldRecord.getData()[entry.getValue().pos]);
+            	newRecord.setData(entry.getValue(), oldRecord.getData()[entry.getValue().pos]);
             }
-            newRecord.setData(name, "");
+            newRecord.setData(name, _newValue);
 
             hf.addRecord(newRecord);
         }
-
+        
+        records.clear();
+  
         return true;
     }
 
@@ -188,8 +200,7 @@ public class SystemCatalog {
           // Check if column doesn't exist
         HeapFile hf = getTable(table);
         Schema oldSchema = hf.getSchema();
-        if (hf == null)
-            return false;
+
         if (oldSchema.hasField(name))
             return false;
         // Get all records
@@ -224,19 +235,26 @@ public class SystemCatalog {
           // Check if column doesn't exist
         HeapFile hf = getTable(table);
         Schema oldSchema = hf.getSchema();
-        if (hf == null)
-            return false;
-        if (oldSchema.hasField(name))
+
+        if (!oldSchema.hasField(name))
             return false;
         // Get all records
         ArrayList<Pair<RID, String>> records = hf.getAllRecords();
+        
         // Drop table
         dropTable(table);
+        
         // Create new schema
         Schema newSchema = new Schema(oldSchema);
         newSchema.removeField(name);
+        
         // Recreate table
         createTable(newSchema);
+        
+        //Cleaning HF
+        hf = null;
+        hf = getTable(table);
+        
         // Reinsert records
         for (Pair<RID, String> record : records)
         {
@@ -249,9 +267,13 @@ public class SystemCatalog {
                 else
                     newRecord.setData(entry.getValue(), oldRecord.getData()[entry.getValue().pos]);
             }
-
+            hf.addRecord(newRecord);
         }
-
+        
+        records.clear();
+        
+        records = hf.getAllRecords();
+        
         return true;
     }
 

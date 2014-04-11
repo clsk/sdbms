@@ -1,1 +1,1 @@
-alter table producto add pcantidad char (15);
+alter table producto add psuplidor char (15);

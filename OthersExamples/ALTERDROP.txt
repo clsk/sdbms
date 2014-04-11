@@ -1,0 +1,1 @@
+alter table producto drop column pcosto;
