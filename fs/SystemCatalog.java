@@ -210,8 +210,16 @@ public class SystemCatalog {
         // Create new schema
         Schema newSchema = new Schema(oldSchema);
         newSchema.addField(name, length);
+        
+        //Limpiado el HeapFile
+        hf = null;
+        
         // Recreate table
         createTable(newSchema);
+        
+        //Cargando la tabla recreada.
+        hf = getTable(table);
+        		
         // Reinsert records
         for (Pair<RID, String> record : records)
         {
@@ -224,7 +232,8 @@ public class SystemCatalog {
                 else
                     newRecord.setData(entry.getValue(), oldRecord.getData()[entry.getValue().pos]);
             }
-
+            //Reescribiendo records.
+            hf.addRecord(newRecord);
         }
 
         return true;
@@ -244,6 +253,9 @@ public class SystemCatalog {
         // Drop table
         dropTable(table);
         
+        //Cleaning HF
+        hf = null;
+        
         // Create new schema
         Schema newSchema = new Schema(oldSchema);
         newSchema.removeField(name);
@@ -251,8 +263,7 @@ public class SystemCatalog {
         // Recreate table
         createTable(newSchema);
         
-        //Cleaning HF
-        hf = null;
+        // Getting the table
         hf = getTable(table);
         
         // Reinsert records
@@ -267,11 +278,21 @@ public class SystemCatalog {
                 else
                     newRecord.setData(entry.getValue(), oldRecord.getData()[entry.getValue().pos]);
             }
+            //Reescribiendo Records.
             hf.addRecord(newRecord);
         }
         
         records.clear();
         
+        //This step is for test.
+        /*
+         * Se obtendran los records que han sido insertados en el HeapFile.
+         * El error se genera cuando se intenta realizar un getAllRecords en otro command.
+         * Por Ejemplo:
+         * 	- Se realiza un ALTER DROP, primero.
+         * 	- Se verifica en la carpeta de la Base de Datos la modificacion del esquema de la tabla.
+         * 	- Luego se realiza un SELECT commmand y no se cargan los records contenidos en el page.
+         */
         records = hf.getAllRecords();
         
         return true;
