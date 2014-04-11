@@ -52,9 +52,6 @@ public class Schema
      */  
     public void addField(String _name, FieldValue fieldValue)
     {
-    	if (fields == null){
-    		fields = new HashMap <String, FieldValue> ();
-    	}
     	if (!fields.containsKey(_name.toLowerCase())){
         	fields.put(_name.toLowerCase(), new FieldValue(fieldValue));
         	increaseRecordLength(fieldValue.size);

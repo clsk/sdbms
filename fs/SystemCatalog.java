@@ -27,7 +27,7 @@ public class SystemCatalog {
     
     public boolean createTable(Schema schema)
     {
-        if ( !heapFiles.containsKey(schema.getSchemaName()) || !Disk.ExistsTable(schema.getSchemaName()))
+        if ( !heapFiles.containsKey(schema.getSchemaName()) )
         {
             // create table on disk
             Head h = new Head(0, Page.NULL_ID);
@@ -58,15 +58,6 @@ public class SystemCatalog {
         return false;
     }
     
-    public void addColumn (Schema _table, String _name, int Size){
-    	Record r = new Record (catalogFieldsHeap.getSchema());
-    	r.setData("schema", _table.getSchemaName());
-    	r.setData("name", _name);
-    	r.setData("pos", Integer.toString(_table.getFieldCount()));
-    	r.setData("size", Integer.toString(Size));
-    	catalogFieldsHeap.addRecord(r);
-    }
-
     public HeapFile getTable(String schemaName)
     {
         return heapFiles.get(schemaName);
@@ -102,6 +93,7 @@ public class SystemCatalog {
 
                 // Delete table directory from Disk
                 Disk.deleteTable(schemaName);
+                heapFiles.remove(schemaName);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -150,9 +142,15 @@ public class SystemCatalog {
         HeapFile hf = getTable(table);
         Schema oldSchema = hf.getSchema();
         if (hf == null)
+        {
+            System.out.println(0);
             return false;
+        }
         if (oldSchema.hasField(name))
+        {
+            System.out.println(1);
             return false;
+        }
         // Get all records
         ArrayList<Pair<RID, String>> records = hf.getAllRecords();
         // Drop table
@@ -161,7 +159,13 @@ public class SystemCatalog {
         Schema newSchema = new Schema(oldSchema);
         newSchema.addField(name, length);
         // Recreate table
-        createTable(newSchema);
+        if (createTable(newSchema) == false)
+        {
+            System.out.println(2);
+            return false;
+        }
+
+        hf = getTable(table);
         // Reinsert records
         for (Pair<RID, String> record : records)
         {
@@ -172,6 +176,8 @@ public class SystemCatalog {
                 newRecord.setData(entry.getValue(), oldRecord.getData()[entry.getValue().pos]);
             }
             newRecord.setData(name, "");
+
+            hf.addRecord(newRecord);
         }
 
         return true;

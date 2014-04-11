@@ -161,13 +161,15 @@ public class HeapFile
         BitSet bs = page.getSlotMap();
         for (int i = bs.nextSetBit(0); i >= 0; i = bs.nextSetBit(i+1))
         {
+            System.out.println("Adding record");
             records.add(new Pair<RID, String>(new RID(page.getID(), i), page.getRecord(i)));
         }
 
-        if (page.getNextPage() != Page.NULL_ID)
+        int nextPageId = page.getNextPage();
+        if (nextPageId != Page.NULL_ID && nextPageId != page.getID())
         {
-            int nextPageId = page.getNextPage();
             page = null; // Set page to null so stack doesn't get too big
+            System.out.println("nextPageId: " + nextPageId);
             Page nextPage = Disk.readPage(schema, nextPageId);
             records.addAll(getAllRecords(nextPage));
         }

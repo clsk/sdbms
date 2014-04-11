@@ -31,59 +31,10 @@ public class Alter extends Query {
 	@Override
 	public void execute (){
 		if (operationType == 'A'){
-			HeapFile hf = SystemCatalog.getInstance().getTable(table);
-			
-			//	Instancia del Schema Viejo de la tabla actual.
-			Schema oldSM = new Schema(table);
-			List<Entry<String, FieldValue>> fields = hf.getSchema().getSortedFields();			
-			for (int i = 0; i < fields.size(); i++){
-				String aux = fields.get(i).getKey();
-				FieldValue _aux= fields.get(i).getValue();
-				oldSM.addField( aux, _aux);
-			}			
-			
-			//	Get all records of actual table.
-			ArrayList<Pair<RID, String>> records =  hf.getAllRecords();
-			
-			//	Adding the new column to the actual table.
-			hf.addNewField(column, columnSize);
-			SystemCatalog.getInstance().addColumn(hf.getSchema(), column, columnSize);
-								
-			//	Eliminacion de la tabla actual.
-			SystemCatalog.getInstance().dropTable(table);
-			for (int j = 0; j < records.size(); j++){
-				RID aux = records.get(j).getKey();
-				hf.removeRecord(aux);
-			}
-						
-			char [] _emptyValue = new char [columnSize];
-			Arrays.fill(_emptyValue, '0');
-			
-			int _size = ( hf.getSchema().getFieldPos(column) );			
-			String [] data = new String [_size];
-			String _vAux = "";
-			
-			for ( Pair <RID, String> record : records){
-				_vAux = record.getValue();
-				Record rAux = Record.valueOf( oldSM, _vAux);
-				
-				for (int i = 0; i < data.length - 1; i++){
-					data[i] = (rAux.getData())[i];
-				}
-				data [hf.getSchema().getFieldPos(column) - 1] = new String (_emptyValue);
-				
-				/*
-				 *	Solo carga las dos primeras records.
-				 *	Luego... Catch a exception.
-				 */
-				rAux.setData(data);
-				RID rid = hf.addRecord(rAux);
-				System.out.println("Inserted record at: " + rid);
-			}
-			
-			if (SystemCatalog.getInstance().createTable(hf.getSchema())) {
-				System.out.println("Column: " + column.toUpperCase() + " was added in Table: " + table.toUpperCase() + ".");
-			}
+            if (SystemCatalog.getInstance().addColumn(table, column, columnSize))
+                System.out.println("Successfully added column " + column + " with size " + columnSize);
+            else
+                System.out.println("Error while attempting to add column " + column);
 		}
 		
 		if (operationType == 'D' ) {
