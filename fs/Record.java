@@ -75,7 +75,7 @@ public class Record
 
         return new Record(schema, data);
     }
-        
+
     private String[] data;
     private Schema schema;
     

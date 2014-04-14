@@ -41,9 +41,9 @@ public class Alter extends Query {
 		}
 		if (operationType == 'R') {
 			if (SystemCatalog.getInstance().resizeColumn(table, column, columnSize))
-                System.out.println("Successfully delete column " + column + " from " + table);
+                System.out.println("Successfully resized column " + column + " from " + table + " to size " + columnSize);
             else
-                System.out.println("Error while attempting to delete column " + column);
+                System.out.println("Error while attempting to resize column " + column + " to size " + columnSize);
 		}
 	}
 	

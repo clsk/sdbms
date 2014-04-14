@@ -122,6 +122,7 @@ public class Schema
             if (!found)
             {
                 if (field.getKey().equals(_name.toLowerCase())){
+                    increaseRecordLength(-field.getValue().size);
                 	fields.remove(_name);
                     found = true;
                 }
@@ -187,7 +188,11 @@ public class Schema
 
     Schema(Schema rhs)
     {
-        fields = (HashMap <String, FieldValue>)rhs.fields.clone();
+        fields = new HashMap<String, FieldValue>();
+        for (Entry<String, FieldValue> field : rhs.fields.entrySet())
+        {
+            fields.put(field.getKey(), new FieldValue(field.getValue()));
+        }
         name = rhs.name;
         recordLength = rhs.recordLength;
         lastPageNum = 0;

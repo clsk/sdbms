@@ -201,7 +201,7 @@ public class SystemCatalog {
         HeapFile hf = getTable(table);
         Schema oldSchema = hf.getSchema();
 
-        if (oldSchema.hasField(name))
+        if (!oldSchema.hasField(name))
             return false;
         // Get all records
         ArrayList<Pair<RID, String>> records = hf.getAllRecords();
@@ -209,28 +209,25 @@ public class SystemCatalog {
         dropTable(table);
         // Create new schema
         Schema newSchema = new Schema(oldSchema);
-        newSchema.addField(name, length);
+        newSchema.resizeField(name, length);
         
         //Limpiado el HeapFile
         hf = null;
         
         // Recreate table
         createTable(newSchema);
-        
+
         //Cargando la tabla recreada.
         hf = getTable(table);
-        		
+
         // Reinsert records
         for (Pair<RID, String> record : records)
         {
             Record oldRecord = Record.valueOf(oldSchema, record.getValue());
             Record newRecord = new Record(newSchema);
-            for (Entry<String, FieldValue> entry : oldSchema.getFields().entrySet())
+            for (Entry<String, FieldValue> entry : newSchema.getFields().entrySet())
             {
-                if (entry.getKey().equals(name.toLowerCase()))
-                    newRecord.setData(entry.getValue(), oldRecord.getData()[entry.getValue().pos].substring(0, length < entry.getValue().size ? length : entry.getValue().size));
-                else
-                    newRecord.setData(entry.getValue(), oldRecord.getData()[entry.getValue().pos]);
+                newRecord.setData(entry.getValue(), oldRecord.getData()[entry.getValue().pos]);
             }
             //Reescribiendo records.
             hf.addRecord(newRecord);
@@ -273,27 +270,16 @@ public class SystemCatalog {
             Record newRecord = new Record(newSchema);
             for (Entry<String, FieldValue> entry : oldSchema.getFields().entrySet())
             {
-                if (entry.getKey().equals(name.toLowerCase()))
-                    continue;
-                else
+                if (!entry.getKey().equals(name.toLowerCase()))
+                {
                     newRecord.setData(entry.getValue(), oldRecord.getData()[entry.getValue().pos]);
+                }
             }
             //Reescribiendo Records.
             hf.addRecord(newRecord);
         }
         
         records.clear();
-        
-        //This step is for test.
-        /*
-         * Se obtendran los records que han sido insertados en el HeapFile.
-         * El error se genera cuando se intenta realizar un getAllRecords en otro command.
-         * Por Ejemplo:
-         * 	- Se realiza un ALTER DROP, primero.
-         * 	- Se verifica en la carpeta de la Base de Datos la modificacion del esquema de la tabla.
-         * 	- Luego se realiza un SELECT commmand y no se cargan los records contenidos en el page.
-         */
-        records = hf.getAllRecords();
         
         return true;
     }
