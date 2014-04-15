@@ -21,7 +21,7 @@ public class Select extends Query {
     @Override
     public void execute()
     {
-        System.out.println("\nSELECT statement on table => " + hf.getSchema().getSchemaName().toUpperCase() + ".");
+    	System.out.println("\nSELECT statement on table => " + hf.getSchema().getSchemaName().toUpperCase() + ".");
         System.out.println("Virtual Table Generated.\n");
     	
     	System.out.print("RID");
