@@ -17,6 +17,7 @@ public class Select extends Query {
 
     private HeapFile hf;
     private String [] filters = null;
+    private String [] conditions = null;
 
     @Override
     public void execute()
@@ -60,7 +61,7 @@ public class Select extends Query {
      *	Metodo de Verificacion de Atributos y la Projeccion dentro
      *	del Heap File creado.
      */
-    boolean CheckFields (){
+    private boolean CheckFields (){
     	Set <String> attributes = hf.getSchema().getFields().keySet();
     	
     	for (int i = 0; i < filters.length; i++) {
@@ -77,19 +78,50 @@ public class Select extends Query {
     	filters = columns.split("\\s+");
     }
     
+    private void SetWhereConditions(String [] _conditions){
+    	conditions = _conditions;
+    }
+    
+    private boolean CheckFields (boolean letsCheck) {
+    	Set <String> attributes = hf.getSchema().getFields().keySet();
+    	
+    	for (int i = 0; i < conditions.length; i = i + 2) {
+    		if (!attributes.contains(conditions[i])) {
+    			return false;
+    		}
+    	}
+    	
+    	return true;
+    }
+    
     static final Pattern SELECT_PATTERN = Pattern.compile("select\\s+\\*\\s+from\\s+(\\w+);?", Pattern.CASE_INSENSITIVE);
     static final Pattern SELECT_SPECIFIC_COLUMNS = Pattern.compile("select\\s+\\w+(,(\\s|)\\w+|)+?\\s+from\\s+(\\w+);?", 
+    		Pattern.CASE_INSENSITIVE);
+    static final Pattern WHERE_CLAUSE = Pattern.compile("where\\s([\\w]+\\s(<|>|<=|>=|&&|\\|\\|!=|==)\\s)+[\\w]+;$", 
     		Pattern.CASE_INSENSITIVE);
 
     static public Select parseSelect (String line, BufferedReader reader)
     {
-
-        Matcher m = SELECT_PATTERN.matcher (line);
-        Matcher n = SELECT_SPECIFIC_COLUMNS.matcher(line);
+        String [] fieldsNoperators = null;
+        String lineAux;
         String filters = "";
         HeapFile hf= null;
+    	
+    	if (line.contains("where")) {
+    		lineAux = line.replaceAll("\\s+where.*", "");
+        	line = line.replaceAll("select.*\\s+where\\s+", "");
+        	line = line.replaceAll(";", "");
+        	line = line.toLowerCase();
+        }
+    	else {
+    		lineAux = line;
+    	}
         
-        if (!m.matches() && !n.matches())
+        Matcher m = SELECT_PATTERN.matcher (lineAux);
+        Matcher n = SELECT_SPECIFIC_COLUMNS.matcher(lineAux);
+        Matcher compare = WHERE_CLAUSE.matcher(line);
+        
+        if (!m.matches() && !n.matches() && !compare.matches())
         {
         	System.out.println(line);
             System.out.println("Error matching SELECT statement");
@@ -127,15 +159,29 @@ public class Select extends Query {
         	filters = filters.replaceAll(",|\\s+", " ");        	
         }
         
+        if (compare.matches()) {
+        	fieldsNoperators = line.split("\\s+");      	
+        }
+        
         /*
     	 * Declaracion de Select (HeapFile)
     	 */
     	Select _nuevo = new Select(hf);
     	
-    	//	Lista de atributos llevada a minusculas.
+    	//Lista de atributos llevada a minusculas.
     	_nuevo.SetFilters(filters.toLowerCase());
     	
-    	if (_nuevo.CheckFields()){
+    	//Checking los filtros de la sentencia WHERE
+    	if (fieldsNoperators != null && compare.matches()){
+    		//Establecimiento de las condiciones de busquedad de l WHERE
+    		_nuevo.SetWhereConditions(fieldsNoperators);
+    	}
+    	else {
+    		System.out.println("ERROR en la sentencia WHERE.");
+    		return null;
+    	}
+    	
+    	if (_nuevo.CheckFields() && _nuevo.CheckFields(true)){
     		return _nuevo;
     	}
     	else
