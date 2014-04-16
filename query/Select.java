@@ -1,13 +1,22 @@
 package query;
 
 import fs.*;
+
 import java.io.BufferedReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.Map.Entry;
+
+class Operation
+{
+	public String op;
+	public String lhs;
+	public String rhs;
+}
 
 public class Select extends Query {
     public Select(HeapFile _hf)
@@ -18,6 +27,59 @@ public class Select extends Query {
     private HeapFile hf;
     private String [] filters = null;
     private String [] conditions = null;
+    
+    public boolean compare(Operation op, Record record)
+    {
+    	if (op.equals("=="))
+    		return record.getValueForField(op.lhs).trim().equals(op.rhs);
+    	else 
+    		return !record.getValueForField(op.lhs).trim().equals(op.rhs);
+    }
+    
+    public boolean filter(Record r)
+    {
+    	boolean matches = true;
+    	
+    	if (conditions == null){
+    		return true;
+    	}
+    	
+    	if (conditions.length > 0)
+    	{
+    		Operation operation = new Operation();
+    		operation.lhs = conditions[0];
+    		operation.op = conditions[1];
+    		operation.rhs = conditions[2];
+    		matches = compare(operation, r);
+    		for (int i = 3; i < conditions.length; i++)
+    		{
+    			String logicalOp = conditions[i];
+    			operation.lhs = conditions[++i];
+    			operation.op = conditions[++i];
+    			operation.rhs = conditions[++i];
+    			
+    			if (logicalOp.equals("AND"))
+    			{
+    				matches = matches && compare(operation, r);
+    			}
+    			else if (logicalOp.equals("OR"))
+    			{
+    				if (matches)
+    					continue;
+    				else
+    					matches = compare(operation, r);
+    			}
+    			else
+    			{
+    				System.out.println("Unexpected logical operator");
+    				matches = false;
+    			}
+    		}
+    	}
+    	
+  	
+    	return matches;
+    }
 
     @Override
     public void execute()
@@ -41,11 +103,15 @@ public class Select extends Query {
         Arrays.fill(array, '-');
         System.out.println(new String(array));
         
-        // Print Records
+        // Print Record
         ArrayList<Pair<RID, String>> records =  hf.getAllRecords();
-        for (Pair<RID, String> record : records)
+        for (Iterator<Pair<RID, String>> Iter = records.iterator(); Iter.hasNext() ;)
         {
-            Record r = Record.valueOf(hf.getSchema(), record.getValue());
+        	Pair<RID, String> record = Iter.next();
+        	Record r = Record.valueOf(hf.getSchema(), record.getValue());
+        	if (!filter(r))
+        		continue;
+        	
             System.out.print(record.getKey());
             String [] data = r.getData();
             for (int j = 0; j < filters.length; j++){
@@ -83,11 +149,18 @@ public class Select extends Query {
     }
     
     private boolean CheckFields (boolean letsCheck) {
+    	
+    	if (conditions == null) {
+    		return true;
+    	}
+    	
     	Set <String> attributes = hf.getSchema().getFields().keySet();
     	
-    	for (int i = 0; i < conditions.length; i = i + 2) {
-    		if (!attributes.contains(conditions[i])) {
-    			return false;
+    	for (int i = 0; i < conditions.length; i ++) {
+    		if (!Pattern.matches("'.*'", conditions[i]) && !Pattern.matches("(<|>|<=|>=|&&|\\|\\||!=|==)", conditions[i])) {
+    			if (!attributes.contains(conditions[i])) {
+    				return false;
+    			}
     		}
     	}
     	
@@ -154,7 +227,7 @@ public class Select extends Query {
         	 *	Las siguientes lineas eliminan del SELECT
         	 *	la parte inicial 'select' y la parte final 'from'
         	 */
-        	filters = line.replaceAll("(^select\\s+)", "");
+        	filters = lineAux.replaceAll("(^select\\s+)", "");
         	filters = filters.replaceAll("\\s+from.*", "");
         	filters = filters.replaceAll(",|\\s+", " ");        	
         }
@@ -176,12 +249,12 @@ public class Select extends Query {
     		//Establecimiento de las condiciones de busquedad de l WHERE
     		_nuevo.SetWhereConditions(fieldsNoperators);
     	}
-    	else {
-    		System.out.println("ERROR en la sentencia WHERE.");
+    	
+    	if (!_nuevo.CheckFields(true)){
     		return null;
     	}
     	
-    	if (_nuevo.CheckFields() && _nuevo.CheckFields(true)){
+    	if (_nuevo.CheckFields()){
     		return _nuevo;
     	}
     	else
