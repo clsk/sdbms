@@ -28,12 +28,16 @@ public class Select extends Query {
     private String [] filters = null;
     private String [] conditions = null;
     
-    public boolean compare(Operation op, Record record)
+    public boolean compare(Operation ope, Record record)
     {
-    	if (op.equals("=="))
-    		return record.getValueForField(op.lhs).trim().equals(op.rhs);
-    	else 
-    		return !record.getValueForField(op.lhs).trim().equals(op.rhs);
+    	boolean val = record.getValueForField(ope.lhs).trim().equals(ope.rhs);
+    	
+    	if (ope.op.equals("==")) {
+    		return val;
+    	}
+    	else {    		
+    		return !val;
+    	}
     }
     
     public boolean filter(Record r)
@@ -47,6 +51,16 @@ public class Select extends Query {
     	if (conditions.length > 0)
     	{
     		Operation operation = new Operation();
+    		
+    		if (Pattern.matches("'.*'", conditions[0])){
+    			conditions[0] = conditions[0].replaceAll("['']+", "");    			
+    		}
+    		if (Pattern.matches("'.*'", conditions[1])) {
+    			conditions[1] = conditions[1].replaceAll("['']+", "");
+    		}
+    		if (Pattern.matches("'.*'", conditions[2])) {
+    			conditions[2] = conditions[2].replaceAll("['']+", "");
+    		}
     		operation.lhs = conditions[0];
     		operation.op = conditions[1];
     		operation.rhs = conditions[2];
@@ -58,11 +72,14 @@ public class Select extends Query {
     			operation.op = conditions[++i];
     			operation.rhs = conditions[++i];
     			
-    			if (logicalOp.equals("AND"))
-    			{
-    				matches = matches && compare(operation, r);
+    			if (logicalOp.equals("and"))
+    			{	
+    				boolean temp = compare (operation, r);
+    				if (matches && temp) {
+    					matches = temp;    					
+    				}
     			}
-    			else if (logicalOp.equals("OR"))
+    			else if (logicalOp.equals("or"))
     			{
     				if (matches)
     					continue;
@@ -157,7 +174,7 @@ public class Select extends Query {
     	Set <String> attributes = hf.getSchema().getFields().keySet();
     	
     	for (int i = 0; i < conditions.length; i ++) {
-    		if (!Pattern.matches("'.*'", conditions[i]) && !Pattern.matches("(<|>|<=|>=|&&|\\|\\||!=|==)", conditions[i])) {
+    		if (!Pattern.matches("'.*'", conditions[i]) && !Pattern.matches("<|>|<=|>=|and|or|!=|==", conditions[i])) {
     			if (!attributes.contains(conditions[i])) {
     				return false;
     			}
@@ -170,7 +187,7 @@ public class Select extends Query {
     static final Pattern SELECT_PATTERN = Pattern.compile("select\\s+\\*\\s+from\\s+(\\w+);?", Pattern.CASE_INSENSITIVE);
     static final Pattern SELECT_SPECIFIC_COLUMNS = Pattern.compile("select\\s+\\w+(,(\\s|)\\w+|)+?\\s+from\\s+(\\w+);?", 
     		Pattern.CASE_INSENSITIVE);
-    static final Pattern WHERE_CLAUSE = Pattern.compile("where\\s([\\w]+\\s(<|>|<=|>=|&&|\\|\\|!=|==)\\s)+[\\w]+;$", 
+    static final Pattern WHERE_CLAUSE = Pattern.compile("([\\w]+\\s(<|>|<=|>=|AND|OR|!=|==)\\s)+[\\w]+", 
     		Pattern.CASE_INSENSITIVE);
 
     static public Select parseSelect (String line, BufferedReader reader)
@@ -192,7 +209,8 @@ public class Select extends Query {
         
         Matcher m = SELECT_PATTERN.matcher (lineAux);
         Matcher n = SELECT_SPECIFIC_COLUMNS.matcher(lineAux);
-        Matcher compare = WHERE_CLAUSE.matcher(line);
+        String temp = line.replaceAll("['']+", "");
+        Matcher compare = WHERE_CLAUSE.matcher(temp);
         
         if (!m.matches() && !n.matches() && !compare.matches())
         {
